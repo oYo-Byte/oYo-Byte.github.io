@@ -138,8 +138,8 @@
 <li>设置了ORACLE_HOME环境变量</li>
 </ul>
 <p><a href="https://github.com/laurenz/oracle_fdw" target="_blank" rel="noopener">下载oracle_fdw源代码</a>,<br>并解压到某个目录下，进入文件目录，执行：  </p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> make  </span></span><br><span class="line"><span class="meta">$</span><span class="bash"> make install</span></span><br></pre></td></tr></table></figure>
-<p>安装完毕后，使用psql连接到PostgreSQL；<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> psql -d testdb;</span></span><br></pre></td></tr></table></figure></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> make  </span><br><span class="line"><span class="meta">$</span> make install</span><br></pre></td></tr></table></figure>
+<p>安装完毕后，使用psql连接到PostgreSQL；<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> psql -d testdb;</span><br></pre></td></tr></table></figure></p>
 <p>使用PostgreSQL的超级用户配置oralce_fdw:</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">testdb=# create extension oracle_fdw;</span><br><span class="line">testdb=# create server oracle_121_56 foreign data wrapper oracle_fdw options (dbserver '//192.168.121.56:1521/orcl');</span><br><span class="line">testdb=# create user mapping for public server oracle_121_56 options (user 'dbuser' password 'test');</span><br></pre></td></tr></table></figure>
 <h3 id="简单查询，无索引"><a href="#简单查询，无索引" class="headerlink" title="简单查询，无索引"></a>简单查询，无索引</h3><p>生成测试数据，创建一个表，并同时添加1百万条数据</p>
@@ -168,7 +168,7 @@
 <ul>
 <li>sqlplus</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sqlplus dbuser/<span class="built_in">test</span>@//192.168.121.56:1521/orcl</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sqlplus dbuser/test@//192.168.121.56:1521/orcl</span><br></pre></td></tr></table></figure>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SQL&gt; select count(*) from test_noindex;</span><br><span class="line"> COUNT(*)</span><br><span class="line"><span class="comment">----------</span></span><br><span class="line">2000000</span><br><span class="line">Elapsed: 00:00:00.13</span><br></pre></td></tr></table></figure>
 <ul>
 <li>oracle_fdw</li>
@@ -178,11 +178,11 @@
 <li>查询某条记录</li>
 </ol>
 <ul>
-<li><p>sqlplus</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SQL&gt; select * from test_noindex where id= 50;</span><br><span class="line"></span><br><span class="line">	ID  	INC_DATETIME 	  RANDOM_ID		RANDOM_STRING </span><br><span class="line"><span class="comment">-------- -------------------- ------------ -----------------------------------</span></span><br><span class="line">	50  2018-07-25 01:13:38	       21	2VMPGE0K6Y293T9WRT7G</span><br><span class="line">	50  2018-09-13 01:49:31	       51	RGUV1BJJNSTNXDMXMVRL</span><br><span class="line">Elapsed: 00:00:00.05</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>oracle_fdw</p>
-</li>
+<li>sqlplus</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SQL&gt; select * from test_noindex where id= 50;</span><br><span class="line"></span><br><span class="line">	ID  	INC_DATETIME 	  RANDOM_ID		RANDOM_STRING </span><br><span class="line"><span class="comment">-------- -------------------- ------------ -----------------------------</span></span><br><span class="line">	50  2018-07-25 01:13:38	       21	2VMPGE0K6Y293T9WRT7G</span><br><span class="line">	50  2018-09-13 01:49:31	       51	RGUV1BJJNSTNXDMXMVRL</span><br><span class="line">Elapsed: 00:00:00.05</span><br></pre></td></tr></table></figure>
+<ul>
+<li>oracle_fdw</li>
 </ul>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">testdb=# select * from test_noindex where id= 50;</span><br><span class="line"> id |    inc_datetime     | random_id |    random_string     </span><br><span class="line"><span class="comment">----+---------------------+-----------+----------------------</span></span><br><span class="line"> 50 | 2018-07-25 01:13:38 |        21 | 2VMPGE0K6Y293T9WRT7G</span><br><span class="line"> 50 | 2018-09-13 01:49:31 |        51 | RGUV1BJJNSTNXDMXMVRL</span><br><span class="line">(2 rows)</span><br><span class="line"></span><br><span class="line">Time: 56.811 ms</span><br></pre></td></tr></table></figure>
 <ol start="3">
