@@ -7,17 +7,17 @@
   
   <title>PostgreSQL使用oracle_fdw与Oracle查询性能对比 | oYo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="在PostgreSQL中使用oracle_fdw安装oracle_fdw插件 安装前要求：     全部功能要求PostgreSQL9.3及以上 Oracle client要求10.1以上 确保PostgreSQL配置了--without-ldap 确保pg_config在PATH中(用 pg_config --pgxs测试) 设置了ORACLE_HOME环境变量 下载oracle_fdw源代码,">
+  <meta name="description" content="在PostgreSQL中使用oracle_fdw安装oracle_fdw插件 安装前要求：     全部功能要求PostgreSQL9.3及以上 Oracle client要求10.1以上 确保PostgreSQL配置了--without-ldap 确保pg_config在PATH中(用 pg_config --pgxs测试) 设置了ORACLE_HOME环境变量  下载oracle_fdw源代码">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PostgreSQL使用oracle_fdw与Oracle查询性能对比">
 <meta property="og:url" content="http://byte-cloris.com/2018/07/25/PostgreSQL使用oracle_fdw与Oracle查询性能对比/index.html">
 <meta property="og:site_name" content="oYo">
-<meta property="og:description" content="在PostgreSQL中使用oracle_fdw安装oracle_fdw插件 安装前要求：     全部功能要求PostgreSQL9.3及以上 Oracle client要求10.1以上 确保PostgreSQL配置了--without-ldap 确保pg_config在PATH中(用 pg_config --pgxs测试) 设置了ORACLE_HOME环境变量 下载oracle_fdw源代码,">
+<meta property="og:description" content="在PostgreSQL中使用oracle_fdw安装oracle_fdw插件 安装前要求：     全部功能要求PostgreSQL9.3及以上 Oracle client要求10.1以上 确保PostgreSQL配置了--without-ldap 确保pg_config在PATH中(用 pg_config --pgxs测试) 设置了ORACLE_HOME环境变量  下载oracle_fdw源代码">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-07-25T03:40:02.901Z">
+<meta property="og:updated_time" content="2018-07-25T04:09:19.395Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PostgreSQL使用oracle_fdw与Oracle查询性能对比">
-<meta name="twitter:description" content="在PostgreSQL中使用oracle_fdw安装oracle_fdw插件 安装前要求：     全部功能要求PostgreSQL9.3及以上 Oracle client要求10.1以上 确保PostgreSQL配置了--without-ldap 确保pg_config在PATH中(用 pg_config --pgxs测试) 设置了ORACLE_HOME环境变量 下载oracle_fdw源代码,">
+<meta name="twitter:description" content="在PostgreSQL中使用oracle_fdw安装oracle_fdw插件 安装前要求：     全部功能要求PostgreSQL9.3及以上 Oracle client要求10.1以上 确保PostgreSQL配置了--without-ldap 确保pg_config在PATH中(用 pg_config --pgxs测试) 设置了ORACLE_HOME环境变量  下载oracle_fdw源代码">
   
     <link rel="alternate" href="/atom.xml" title="oYo" type="application/atom+xml">
   
@@ -67,7 +67,7 @@
         <section id="main"><article id="post-PostgreSQL使用oracle_fdw与Oracle查询性能对比" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/07/25/PostgreSQL使用oracle_fdw与Oracle查询性能对比/" class="article-date">
-  <time datetime="2018-07-25T03:29:52.000Z" itemprop="datePublished">2018-07-25</time>
+  <time datetime="2018-07-25T03:29:52.892Z" itemprop="datePublished">2018-07-25</time>
 </a>
     
   </div>
@@ -94,53 +94,44 @@
 <li>Oracle client要求10.1以上</li>
 <li>确保PostgreSQL配置了<code>--without-ldap</code></li>
 <li>确保<code>pg_config</code>在PATH中(用 <code>pg_config --pgxs</code>测试)</li>
-<li><p>设置了ORACLE_HOME环境变量</p>
-<p><a href="https://github.com/laurenz/oracle_fdw" target="_blank" rel="noopener">下载oracle_fdw源代码</a>,<br>并解压到某个目录下，进入文件目录，执行：  </p>
-<p>$ make<br>$ make install</p>
-<p>安装完毕后，使用psql连接到PostgreSQL；</p>
-<p>$ psql -d testdb;</p>
-<p>使用PostgreSQL的超级用户配置oralce_fdw:</p>
-<p>testdb=# create extension oracle_fdw;<br>testdb=# create server oracle_121_56 foreign data wrapper oracle_fdw options (dbserver ‘//192.168.121.56:1521/orcl’);<br>testdb=# create user mapping for public server oracle_121_56 options (user ‘dbuser’ password ‘test’);</p>
-</li>
+<li>设置了ORACLE_HOME环境变量</li>
 </ul>
-<h3 id="简单查询，无索引"><a href="#简单查询，无索引" class="headerlink" title="简单查询，无索引"></a>简单查询，无索引</h3><p>   生成测试数据，创建一个表，并同时添加1百万条数据</p>
-<pre><code>create table test_noindex as select rownum as id,to_char(sysdate + rownum/24/3600, &apos;yyyy-mm-dd hh24:mi:ss&apos;) as inc_datetime,trunc(dbms_random.value(0, 100)) as random_id,dbms_random.string(&apos;x&apos;, 20) random_string from dual connect by level &lt;= 1000000;
-</code></pre><p>   创建完表后，在原来表的基础上追加记录</p>
-<pre><code>insert into test_noindex (ID, INC_DATETIME,RANDOM_ID,RANDOM_STRING) select rownum as id,  to_char(sysdate + rownum, &apos;yyyy-mm-dd hh24:mi:ss&apos;) as inc_datetime,trunc(dbms_random.value(0, 100)) as random_id, dbms_random.string(&apos;x&apos;, 20) random_string  from dual  connect by level &lt;= 1000000; 
-commit;
-</code></pre><p>   上面SQL是利用了Oracle数据库语法的几个实用小技巧实现的:  </p>
-<pre><code>1. 利用Oracle特有的“connect by”树形连接语法生成测试记录，“level &lt;= 10”表示要生成10记录；  
-2. 利用rownum虚拟列生成递增的整数数据；  
-3. 利用sysdate函数加一些简单运算来生成日期数据，本例中是每条记录的时间加1秒；  
-4. 利用dbms_random.value函数生成随机的数值型数据，本例中是生成0到100之间的随机整数；  
-5. 利用dbms_random.string函数生成随机的字符型数据，本例中是生成长度为20的随机字符串，字符串中可以包括字符或数字。  
-6. to_char(sysdate + rownum, &apos;yyyy-mm-dd hh24:mi:ss&apos;) 这里是转换为字符串，如果该字段的类型为TimeStamp时间戳，那这里可以改写一下方法，转换为时间戳 to_timestamp(sysdate + rownum, &apos;yyyy-mm-dd hh24:mi:ss&apos;)
-</code></pre><p>   PostgreSQL 创建相应的外部表</p>
-<pre><code>testdb=# create foreign table test_noindex(id int, inc_datetime varchar(19), random_id int, random_string varchar(4000)) server oracle_121_56 options (schema &apos;DBUSER&apos;, table &apos;TEST_NOINDEX&apos;);
-</code></pre><p>   查询表的行数</p>
-<p>   sqlplus</p>
-<pre><code>$ sqlplus dbuser/test@//192.168.121.56:1521/orcl
-
-SQL&gt; select count(*) from test_noindex;
- COUNT(*)
-----------
-2000000
-Elapsed: 00:00:00.13
-</code></pre><p>   oralce_fdw</p>
-<pre><code>testdb=# select count(*) from test_noindex;
-count  
----------
-2000000
-(1 row)
-
-Time: 5264.299 ms (00:05.264)
-</code></pre><p>   查询某条记录</p>
-<p>   sqlplus</p>
+<p><a href="https://github.com/laurenz/oracle_fdw" target="_blank" rel="noopener">下载oracle_fdw源代码</a>,<br>并解压到某个目录下，进入文件目录，执行：  </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> make  </span><br><span class="line"><span class="meta">$</span> make install</span><br></pre></td></tr></table></figure>
+<p>安装完毕后，使用psql连接到PostgreSQL；<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> psql -d testdb;</span><br></pre></td></tr></table></figure></p>
+<p>使用PostgreSQL的超级用户配置oralce_fdw:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">testdb=# create extension oracle_fdw;</span><br><span class="line">testdb=# create server oracle_121_56 foreign data wrapper oracle_fdw options (dbserver '//192.168.121.56:1521/orcl');</span><br><span class="line">testdb=# create user mapping for public server oracle_121_56 options (user 'dbuser' password 'test');</span><br></pre></td></tr></table></figure>
+<h3 id="简单查询，无索引"><a href="#简单查询，无索引" class="headerlink" title="简单查询，无索引"></a>简单查询，无索引</h3><p>生成测试数据，创建一个表，并同时添加1百万条数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> test_noindex <span class="keyword">as</span> <span class="keyword">select</span> <span class="keyword">rownum</span> <span class="keyword">as</span> <span class="keyword">id</span>,to_char(<span class="keyword">sysdate</span> + <span class="keyword">rownum</span>/<span class="number">24</span>/<span class="number">3600</span>, <span class="string">'yyyy-mm-dd hh24:mi:ss'</span>) <span class="keyword">as</span> inc_datetime,trunc(dbms_random.value(<span class="number">0</span>, <span class="number">100</span>)) <span class="keyword">as</span> random_id,dbms_random.string(<span class="string">'x'</span>, <span class="number">20</span>) random_string <span class="keyword">from</span> dual <span class="keyword">connect</span> <span class="keyword">by</span> <span class="keyword">level</span> &lt;= <span class="number">1000000</span>;</span><br></pre></td></tr></table></figure>
+<p>创建完表后，在原来表的基础上追加记录<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> test_noindex (<span class="keyword">ID</span>, INC_DATETIME,RANDOM_ID,RANDOM_STRING) <span class="keyword">select</span> <span class="keyword">rownum</span> <span class="keyword">as</span> <span class="keyword">id</span>,  to_char(<span class="keyword">sysdate</span> + <span class="keyword">rownum</span>, <span class="string">'yyyy-mm-dd hh24:mi:ss'</span>) <span class="keyword">as</span> inc_datetime,trunc(dbms_random.value(<span class="number">0</span>, <span class="number">100</span>)) <span class="keyword">as</span> random_id, dbms_random.string(<span class="string">'x'</span>, <span class="number">20</span>) random_string  <span class="keyword">from</span> dual  <span class="keyword">connect</span> <span class="keyword">by</span> <span class="keyword">level</span> &lt;= <span class="number">1000000</span>; </span><br><span class="line"><span class="keyword">commit</span>;</span><br></pre></td></tr></table></figure></p>
+<p>上面SQL是利用了Oracle数据库语法的几个实用小技巧实现的:  </p>
+<ol>
+<li><p>利用Oracle特有的“connect by”树形连接语法生成测试记录，“level &lt;= 10”表示要生成10记录； </p>
+</li>
+<li><p>利用rownum虚拟列生成递增的整数数据； </p>
+</li>
+<li><p>利用sysdate函数加一些简单运算来生成日期数据，本例中是每条记录的时间加1秒； </p>
+</li>
+<li><p>利用dbms_random.value函数生成随机的数值型数据，本例中是生成0到100之间的随机整数； </p>
+</li>
+<li><p>利用dbms_random.string函数生成随机的字符型数据，本例中是生成长度为20的随机字符串，字符串中可以包括字符或数字。 </p>
+</li>
+<li><p>to_char(sysdate + rownum, ‘yyyy-mm-dd hh24:mi:ss’) 这里是转换为字符串，如果该字段的类型为TimeStamp时间戳，那这里可以改写一下方法，转换为时间戳 to_timestamp(sysdate + rownum, ‘yyyy-mm-dd hh24:mi:ss’)</p>
+</li>
+</ol>
+<p>PostgreSQL 创建相应的外部表</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">testdb=# create foreign table test_noindex(id int, inc_datetime varchar(19), random_id int, random_string varchar(4000)) server oracle_121_56 options (schema 'DBUSER', table 'TEST_NOINDEX');</span><br></pre></td></tr></table></figure>
+<p>查询表的行数</p>
+<p>sqlplus<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sqlplus dbuser/test@//192.168.121.56:1521/orcl</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SQL&gt; select count(*) from test_noindex;</span><br><span class="line"> COUNT(*)</span><br><span class="line"><span class="comment">----------</span></span><br><span class="line">2000000</span><br><span class="line">Elapsed: 00:00:00.13</span><br></pre></td></tr></table></figure>
+<p>oralce_fdw<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">testdb=# select count(*) from test_noindex;</span><br><span class="line">count  </span><br><span class="line"><span class="comment">---------</span></span><br><span class="line">2000000</span><br><span class="line">(1 row)</span><br><span class="line">Time: 5264.299 ms (00:05.264)</span><br></pre></td></tr></table></figure></p>
+<p>查询某条记录</p>
+<p>sqlplus</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://byte-cloris.com/2018/07/25/PostgreSQL使用oracle_fdw与Oracle查询性能对比/" data-id="cjk0ldvz900004goa3984rl6t" class="article-share-link">Share</a>
+      <a data-url="http://byte-cloris.com/2018/07/25/PostgreSQL使用oracle_fdw与Oracle查询性能对比/" data-id="cjk0m1aig0000o8oadm340yiu" class="article-share-link">Share</a>
       
       
     </footer>
