@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>编写PostgreSQL的外部数据包装器 | oYo</title>
+
+  
+  <meta name="author" content="oYo-Byte">
+  
+
+  
+  <meta name="description" content="外部数据包装函数  FDW作者需要实现处理器函数，并且可以有选择地实现一个验证器函数。两个函数都必须被用一种编译语言（如C）编写。
+  处理器函数简单地返回一个函数指针结构给回调函数，回调函数将被规划器、执行器和多种维护命令调用。编写一个FDW的大部分工作量都在实现这些回调函数上。处理器函数必须被注">
+  
+
+  
+  
+  <meta name="keywords" content="">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="编写PostgreSQL的外部数据包装器"/>
+
+  <meta property="og:site_name" content="oYo"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="oYo" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+</head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">oYo</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/archives">Archives</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>编写PostgreSQL的外部数据包装器</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2018/07/25/PostgreSQL-编写FDW/" rel="bookmark">
+        <time class="entry-date published" datetime="2018-07-25T03:38:05.789Z">
+          2018-07-25
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h2 id="外部数据包装函数"><a href="#外部数据包装函数" class="headerlink" title="外部数据包装函数"></a>外部数据包装函数</h2><p>  FDW作者需要实现处理器函数，并且可以有选择地实现一个验证器函数。两个函数都必须被用一种编译语言（如C）编写。</p>
+<p>  处理器函数简单地返回一个函数指针结构给回调函数，回调函数将被规划器、执行器和多种维护命令调用。编写一个FDW的大部分工作量都在实现这些回调函数上。处理器函数必须被注册在PostgreSQL中，并且注册为不需要参数并且返回特殊的伪类型fdw_handler。回调函数则是普通的 C 函数并且对于 SQL 层是不可见的或者不可调用的。</p>
+<p>  验证器函数负责验证CREATE和ALTER命令中对它的外部数据包装器给出的选项，以及使用该包装器的外部服务器、用户映射和外部表。验证器函数必须被注册为要求两个参数：一个包含需要被验证的选项的文本数组，以及一个表示与这些选项相关联的对象类型的OID（以该对象可能被存储的系统目录的OID的形式， 可以是ForeignDataWrapperRelationId、ForeignServerRelationId、UserMappingRelationId、 或ForeignTableRelationId）。如果没有提供验证器函数，在对象创建或修改时选项不会被检查。</p>
+<h2 id="外部数据包装器回调例程"><a href="#外部数据包装器回调例程" class="headerlink" title="外部数据包装器回调例程"></a>外部数据包装器回调例程</h2><h2 id="外部数据包装器辅助函数"><a href="#外部数据包装器辅助函数" class="headerlink" title="外部数据包装器辅助函数"></a>外部数据包装器辅助函数</h2><h2 id="外部数据包装器查询规划"><a href="#外部数据包装器查询规划" class="headerlink" title="外部数据包装器查询规划"></a>外部数据包装器查询规划</h2><h2 id="外部数据包装器中行锁定"><a href="#外部数据包装器中行锁定" class="headerlink" title="外部数据包装器中行锁定"></a>外部数据包装器中行锁定</h2>
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2018 oYo-Byte
+    
+  </p>
+</footer>
+    
+  </div>
+</div>
+</body>
+</html>
