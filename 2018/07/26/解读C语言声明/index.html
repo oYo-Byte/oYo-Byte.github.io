@@ -160,20 +160,21 @@ The right-left rule: Start reading the declaration from the innermost parenthese
 </ul>
 <p>Try:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2.</span>  <span class="keyword">char</span> *(*fp)( <span class="keyword">int</span>, <span class="keyword">float</span> *);</span><br><span class="line"><span class="number">3.</span>  <span class="keyword">void</span> (*signal(<span class="keyword">int</span>, <span class="keyword">void</span> (*fp)(<span class="keyword">int</span>)))(<span class="keyword">int</span>);</span><br></pre></td></tr></table></figure>
-<p> <br>  <br>  <br>  <br>  <br>  <br>  <br>  <br></p>
+<p> <br> <br> <br> <br> <br> <br> <br> <br></p>
 <p>Answer：</p>
 <ol>
 <li>c是一个具有10个元素的数组，数组的元素都是函数指针，其所指向的函数是接受一个指向整型指针的指针，返回值是指向char的指针。</li>
 </ol>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">     +-----------------+</span><br><span class="line">     | +------+     +-+|</span><br><span class="line">     | |++    |     |++|</span><br><span class="line">     | |^|    |     |^||</span><br><span class="line"><span class="keyword">char</span> *(*c[<span class="number">10</span>])(<span class="keyword">int</span> **p);</span><br><span class="line">  ^  ^ ^ |    |    ^^ || </span><br><span class="line">  |  | +-+    |    |+-+|</span><br><span class="line">  |  +--------+    +--+|</span><br><span class="line">  +--------------------+</span><br></pre></td></tr></table></figure>
 <ol start="2">
-<li><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">     +--------------------+</span><br><span class="line">     | +---+              |</span><br><span class="line">     | |+-+|              |</span><br><span class="line">     | |^ ||              |</span><br><span class="line">char *(*fp)( int, float *);</span><br><span class="line"> ^   ^ ^  ||              |</span><br><span class="line"> |   | +--+|              |</span><br><span class="line"> |   +-----+              |</span><br><span class="line"> +------------------------+</span><br></pre></td></tr></table></figure>
-<p>fp是一个函数指针，该函数接受一个整型和一个浮点型指针入参，返回值是指向char的指针。</p>
-</li>
-<li></li>
+<li>fp是一个函数指针，该函数接受一个整型和一个浮点型指针入参，返回值是指向char的指针。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">     +--------------------+</span><br><span class="line">     | +---+              |</span><br><span class="line">     | |+-+|              |</span><br><span class="line">     | |^ ||              |</span><br><span class="line">char *(*fp)( int, float *);</span><br><span class="line"> ^   ^ ^  ||              |</span><br><span class="line"> |   | +--+|              |</span><br><span class="line"> |   +-----+              |</span><br><span class="line"> +------------------------+</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>signal是一个函数，该函数值一个接受一个整型和一个函数指针（该函数是入参是整型，返回值为空void），返回值是指向一个入参是整型，返回值是空void的函数指针。</li>
 </ol>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">      +-----------------------------+</span><br><span class="line">      |                  +---+      |</span><br><span class="line">      |  +---+           |+-+|      |</span><br><span class="line">      |  ^   |           |^ ||      |</span><br><span class="line">void (*signal(int, void (*fp)(int)))(int);</span><br><span class="line"> ^    ^      |      ^    ^  ||      |</span><br><span class="line"> |    +------+      |    +--+|      |</span><br><span class="line"> |                  +--------+      |</span><br><span class="line"> +----------------------------------+</span><br></pre></td></tr></table></figure>
-<p>signal是一个函数，该函数值一个接受一个整型和一个函数指针（该函数是入参是整型，返回值为空void），返回值是指向一个入参是整型，返回值是空void的函数指针。</p>
+<p><br><br><br></p>
 <p>参考：</p>
 <p><a href="https://blog.csdn.net/wangweixaut061/article/details/6549768" target="_blank" rel="noopener">C语言复杂声明解析</a>  </p>
 <p><a href="https://blog.csdn.net/jixuxjixu3/article/details/5824431" target="_blank" rel="noopener">c语言声明的分析方法 </a>  </p>
