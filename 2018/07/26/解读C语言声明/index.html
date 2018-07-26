@@ -95,7 +95,7 @@ The right-left rule: Start reading the declaration from the innermost parenthese
 </blockquote>
 <p>翻译如下：</p>
 <p>右左法则：首先从最里面的圆括号看起，然后往右看，再往左看。每当遇到圆括号时，就应该掉转阅读方向。一旦解析完圆括号里面所有的东西，就跳出圆括号。重复这个过程直到整个声明解析完毕。 </p>
-<p>这时就会有有个疑惑：怎样判断那个括号是最里面的呢？</p>
+<p>这时就会有个疑惑：怎样判断那个括号是最里面的呢？</p>
 <p>因此需要对这个法则进行修改，结合《C专家编程》里提到的分析方法，应该是从未定义的标识符开始阅读，而不是从括号读起，之所以是未定义的标识符，是因为一个声明里面可能有多个标识符，但未定义的标识符只会有一个。 </p>
 <p>分析C语言的声明步骤：</p>
 <ul>
@@ -160,18 +160,16 @@ The right-left rule: Start reading the declaration from the innermost parenthese
 </ul>
 <p>Try:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2.</span>  <span class="keyword">char</span> *(*fp)( <span class="keyword">int</span>, <span class="keyword">float</span> *);</span><br><span class="line"><span class="number">3.</span>  <span class="keyword">void</span> (*signal(<span class="keyword">int</span>, <span class="keyword">void</span> (*fp)(<span class="keyword">int</span>)))(<span class="keyword">int</span>);</span><br></pre></td></tr></table></figure>
-<p>​    </p>
-<p>​    </p>
-<p>​    </p>
 <p> <br>  <br>  <br>  <br>  <br>  <br>  <br>  <br></p>
 <p>Answer：</p>
 <ol>
 <li>c是一个具有10个元素的数组，数组的元素都是函数指针，其所指向的函数是接受一个指向整型指针的指针，返回值是指向char的指针。</li>
-<li></li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">     +--------------------+</span><br><span class="line">     | +---+              |</span><br><span class="line">     | |+-+|              |</span><br><span class="line">     | |^ ||              |</span><br><span class="line">char *(*fp)( int, float *);</span><br><span class="line"> ^   ^ ^  ||              |</span><br><span class="line"> |   | +--+|              |</span><br><span class="line"> |   +-----+              |</span><br><span class="line"> +------------------------+</span><br></pre></td></tr></table></figure>
-<p> fp是一个函数指针，该函数接受一个整型和一个浮点型指针入参，返回值是指向char的指针。</p>
-<ol start="3">
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">     +-----------------+</span><br><span class="line">     | +------+     +-+|</span><br><span class="line">     | |++    |     |++|</span><br><span class="line">     | |^|    |     |^||</span><br><span class="line"><span class="keyword">char</span> *(*c[<span class="number">10</span>])(<span class="keyword">int</span> **p);</span><br><span class="line">  ^  ^ ^ |    |    ^^ || </span><br><span class="line">  |  | +-+    |    |+-+|</span><br><span class="line">  |  +--------+    +--+|</span><br><span class="line">  +--------------------+</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">     +--------------------+</span><br><span class="line">     | +---+              |</span><br><span class="line">     | |+-+|              |</span><br><span class="line">     | |^ ||              |</span><br><span class="line">char *(*fp)( int, float *);</span><br><span class="line"> ^   ^ ^  ||              |</span><br><span class="line"> |   | +--+|              |</span><br><span class="line"> |   +-----+              |</span><br><span class="line"> +------------------------+</span><br></pre></td></tr></table></figure>
+<p>fp是一个函数指针，该函数接受一个整型和一个浮点型指针入参，返回值是指向char的指针。</p>
+</li>
 <li></li>
 </ol>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">      +-----------------------------+</span><br><span class="line">      |                  +---+      |</span><br><span class="line">      |  +---+           |+-+|      |</span><br><span class="line">      |  ^   |           |^ ||      |</span><br><span class="line">void (*signal(int, void (*fp)(int)))(int);</span><br><span class="line"> ^    ^      |      ^    ^  ||      |</span><br><span class="line"> |    +------+      |    +--+|      |</span><br><span class="line"> |                  +--------+      |</span><br><span class="line"> +----------------------------------+</span><br></pre></td></tr></table></figure>
