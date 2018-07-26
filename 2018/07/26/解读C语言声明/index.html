@@ -103,7 +103,7 @@ The right-left rule: Start reading the declaration from the innermost parenthese
 <li>第2步：查看标识符右边的符号，并确定是一个数组还是函数。</li>
 <li>第3步：查看左边的符号。</li>
 <li>第3步a：如果是左括号则将处理过的部分结合到一起直到遇到右括号作为标识符返回第2步。</li>
-<li>第3步b：如果是const，volatile，*其中之一则继续向左直到不是这三个符号之一。</li>
+<li>第3步b：如果是<code>const</code>，<code>volatile</code>，<code>*</code>其中之一则继续向左直到不是这三个符号之一。</li>
 <li>第4步：剩下的符号构成声明的基本类型。</li>
 </ul>
 <p>感觉还是有点晕？</p>
