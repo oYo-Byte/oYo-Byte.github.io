@@ -1,93 +1,141 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-  <meta charset="utf-8">
-  
-  <title>解读C语言声明 | oYo</title>
+<!DOCTYPE html>
+<html lang="">
 
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>
+    解读C语言声明 | oYo
+  </title>
+  <meta name="description" content="">
+  
+  <meta name="keywords" content="
+  
+  ">
   
   <meta name="author" content="oYo-Byte">
+
+  <meta http-equiv="Cache-Control" content="no-transform"/>
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+  <link rel="icon" type="image/x-icon" href="">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   
 
   
-  <meta name="description" content="C语言所有复杂的指针声明，都是由各种声明嵌套构成的。如何解读复杂指针声明呢？ 
-右左法则（既著名又常用的方法 ）
-右左法则英文原文：
 
-The right-left rule: Start reading the declaration from the innermost parentheses,">
-  
-
-  
-  
-  <meta name="keywords" content="">
-  
-
-  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-
-  <meta property="og:title" content="解读C语言声明"/>
-
-  <meta property="og:site_name" content="oYo"/>
-
-  
-  <meta property="og:image" content="/favicon.ico"/>
-  
-
-  <link href="/favicon.ico" rel="icon">
-  <link rel="alternate" href="/atom.xml" title="oYo" type="application/atom+xml">
-  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/1.0.25-csp/vue.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
 </head>
 
+<body id="replica-app">
 
-<body>
-<div class="blog">
-  <div class="content">
+<nav class="navbar-wrapper">
+  <div class="navbar">
+    <div class="container clearfix">
+      <a href="/" class="navbar-logo"><i class="fa fa-github"></i></a>
 
-    <header>
-  <div class="site-branding">
-    <h1 class="site-title">
-      <a href="/">oYo</a>
-    </h1>
-    <p class="site-description"></p>
-  </div>
-  <nav class="site-navigation">
-    <ul>
-      
-        <li><a href="/">Home</a></li>
-      
+      <div class="navbar-search float-left desktop-only">
+        <div class="navbar-search-form">
+          <label for="gsc-i-id1">This website</label>
+          <div id="google-search">
+            <gcse:search></gcse:search>
+          </div>
+        </div>
+      </div>
+
+      <ul class="navbar-nav float-left">
+        
         <li><a href="/archives">Archives</a></li>
-      
+        
+        
+        <li><a href="/categories">Categories</a></li>
+        
+        
+        <li><a href="/tags">Tags</a></li>
+        
+        
+        <li class="desktop-only"><a href="/atom.xml" target="_blank">RSS</a></li>
+        
+      </ul>
+
+      <ul class="navbar-nav user-nav float-right desktop-only">
+        <li class="user-nav-notification">
+          <a><span class="user-nav-unread"></span><i class="fa fa-bell"></i></a>
+        </li>
+        <li>
+          <a><i class="fa fa-plus"></i> <i class="fa fa-caret-down"></i></a>
+        </li>
+        <li class="user-nav-logo">
+          <a><img src="https://avatars2.githubusercontent.com/u/8343269?s=460&amp;v=4"> <i class="fa fa-caret-down"></i></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="main-container">
+  <header class="header-wrapper desktop-only">
+  <div class="container header-site-detail">
+    <ul class="header-toolbar">
+      <li class="clearfix">
+        <a href="/archives" class="header-toolbar-left"><i
+                  class="fa fa-file-text"></i> Posts </a>
+        <a href="/archives"
+           class="header-toolbar-right"> 3 </a>
+      </li>
+      <li>
+        <a href="/tags" class="header-toolbar-left"><i
+                  class="fa fa-tags"></i> Tags </a>
+        <a href="/tags"
+           class="header-toolbar-right"> 0 </a>
+      </li>
+      <li>
+        <a href="/categories" class="header-toolbar-left"><i
+                  class="fa fa-folder-open"></i> Categories </a>
+        <a href="/categories"
+           class="header-toolbar-right"> 0 </a>
+      </li>
     </ul>
-  </nav>
+    <h2 class="header-title">
+      <i class="fa fa-book text-muted"></i>
+      <a href="/">oYo</a>
+      
+      
+    </h2>
+  </div>
+
+  <div class="container">
+    <div class="header-tab-wrapper clearfix">
+      <span class="header-tab header-tab-selected"><i class="fa fa-thumbs-o-up"></i> Like</span>
+      <span class="header-tab"><i class="fa fa-share-alt"></i> Share</span>
+      <span class="header-tab"><i class="fa fa-comments-o"></i> Discussion</span>
+      <span class="header-tab"><i class="fa fa-bookmark-o"></i> Bookmark </span>
+      <span class="header-tab"><i class="fa fa-smile-o"></i> Smile <i class="fa fa-caret-down"></i></span>
+    </div>
+  </div>
 </header>
 
-    <main class="site-main posts-loop">
-    <article>
 
-  
-    
-    <h3 class="article-title"><span>解读C语言声明</span></h3>
-    
-  
+<div class="post-container container">
+  <h3>
+    <i class="fa fa-user-o"></i>
+    oYo-Byte
 
-  <div class="article-top-meta">
-    <span class="posted-on">
-      <a href="/2018/07/26/解读C语言声明/" rel="bookmark">
-        <time class="entry-date published" datetime="2018-07-26T03:18:23.922Z">
-          2018-07-26
-        </time>
-      </a>
+    <span class="post-date float-right" title="{{moment(1532575103922).format('MMM DD, YYYY, h:mm:ss A')}}">
+      <i class="fa fa-pencil-square-o"></i>
+      {{moment(1532575103922).fromNow()}}
     </span>
-  </div>
+  </h3>
 
-
-  
-
-  <div class="article-content">
-    <div class="entry">
-      
-        <p>C语言所有复杂的指针声明，都是由各种声明嵌套构成的。如何解读复杂指针声明呢？ </p>
+  <article class="post-content">
+    <h1>解读C语言声明</h1>
+    <p>C语言所有复杂的指针声明，都是由各种声明嵌套构成的。如何解读复杂指针声明呢？ </p>
 <p>右左法则（既著名又常用的方法 ）</p>
 <p>右左法则英文原文：</p>
 <blockquote>
@@ -180,39 +228,40 @@ The right-left rule: Start reading the declaration from the innermost parenthese
 <p><a href="https://blog.csdn.net/jixuxjixu3/article/details/5824431" target="_blank" rel="noopener">c语言声明的分析方法 </a>  </p>
 <p><a href="http://c-faq.com/decl/spiral.anderson.html" target="_blank" rel="noopener">The Clockwise/Spiral Rule</a>  </p>
 
-      
-    </div>
-
-  </div>
-
-  <div class="article-footer">
-    <div class="article-meta pull-left">
-
-    
-
-    
-
-    </div>
-
-    
-  </div>
-</article>
-
-
-    </main>
-
-    <footer class="site-footer">
-  <p class="site-info">
-    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
-    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
-    </br>
-    
-    &copy; 2018 oYo-Byte
-    
-  </p>
-</footer>
-    
-  </div>
+  </article>
 </div>
+
+
+    
+
+
+
+
+</div>
+
+<div class="footer-wrapper container">
+  <footer class="footer clearfix">
+    <a href="http://byte-cloris.com" class="footer-logo">
+      <i class="fa fa-github"></i>
+    </a>
+    <ul class="footer-social-link">
+      <li>© 2018 oYo-Byte</li>
+      <li><a href="http://byte-cloris.com">Home</a></li>
+      
+      <li><a href="https://github.com/oYo-Byte">Github</a></li>
+      
+    </ul>
+    <div class="footer-theme-info">
+      Theme <a href="//github.com/sabrinaluo/hexo-theme-replica">Replica</a>
+      by <a href="//github.com/sabrinaluo">Hiitea</a> ❤ Powered by Hexo
+    </div>
+  </footer>
+</div>
+
+
+
+
+<script src="/js/main.js"></script>
+
 </body>
 </html>
