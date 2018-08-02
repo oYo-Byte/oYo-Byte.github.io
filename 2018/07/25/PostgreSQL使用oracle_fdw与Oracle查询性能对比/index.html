@@ -219,9 +219,10 @@
 <li>oracle_fdw</li>
 </ul>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">testdb=# select * from test_table order by random_string offset 0 rows fetch next 5 rows only;</span><br><span class="line">   id   |    inc_datetime     | random_id |    random_string</span><br><span class="line"><span class="comment">--------+---------------------+-----------+----------------------</span></span><br><span class="line"> 938145 | 2018-08-04 21:48:33 |        86 | 00008E7XPHROOHEPUYRC</span><br><span class="line"> 686337 | 2018-08-01 23:51:45 |        31 | 00008JW9S5PXE19F4W4M</span><br><span class="line">  19954 | 2073-03-12 01:49:31 |        69 | 0000G3A2KNDLVN61WOSH</span><br><span class="line"> 382404 | 3065-07-20 01:49:31 |        41 | 0000JDLZP2J8VZFOJ44J</span><br><span class="line"> 234567 | 2660-10-14 01:49:31 |        78 | 000142EWU0B3GMIPA2AL</span><br><span class="line">(5 rows)</span><br><span class="line"></span><br><span class="line">Time: 13275.162 ms (00:13.275)</span><br></pre></td></tr></table></figure>
+<p>oracle_fdw执行时,oracle session中执行的sql</p>
 <p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180731145032.png" alt=""></p>
-<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180731145127.png" alt=""></p>
-<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180731144752.png" alt=""></p>
+<p>psql中查看执行计划<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180731145127.png" alt=""></p>
+<p>网络流量对比<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180731144752.png" alt=""></p>
 <h3 id="简单查询，带索引"><a href="#简单查询，带索引" class="headerlink" title="简单查询，带索引"></a>简单查询，带索引</h3><p>创建id索引</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">index</span> test_id <span class="keyword">on</span> test_table(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure>
 <ol>
