@@ -135,16 +135,16 @@
 
   <article class="post-content">
     <h1>解读C语言声明</h1>
-    <p>C语言所有复杂的指针声明，都是由各种声明嵌套构成的。如何解读复杂指针声明呢？ </p>
+    <p>C语言所有复杂的指针声明，都是由各种声明嵌套构成的。如何解读复杂指针声明呢？</p>
 <p>右左法则（既著名又常用的方法 ）</p>
 <p>右左法则英文原文：</p>
 <blockquote>
-<p>The right-left rule: Start reading the declaration from the innermost parentheses, go right, and then go left. When you encounter parentheses, the direction should be reversed. Once everything in the parentheses has been parsed, jump out of it. Continue till the whole declaration has been parsed. </p>
+<p>The right-left rule: Start reading the declaration from the innermost parentheses, go right, and then go left. When you encounter parentheses, the direction should be reversed. Once everything in the parentheses has been parsed, jump out of it. Continue till the whole declaration has been parsed.</p>
 </blockquote>
 <p>翻译如下：</p>
-<p>右左法则：首先从最里面的圆括号看起，然后往右看，再往左看。每当遇到圆括号时，就应该掉转阅读方向。一旦解析完圆括号里面所有的东西，就跳出圆括号。重复这个过程直到整个声明解析完毕。 </p>
+<p>右左法则：首先从最里面的圆括号看起，然后往右看，再往左看。每当遇到圆括号时，就应该掉转阅读方向。一旦解析完圆括号里面所有的东西，就跳出圆括号。重复这个过程直到整个声明解析完毕。</p>
 <p>这时就会有个疑惑：怎样判断那个括号是最里面的呢？</p>
-<p>因此需要对这个法则进行修改，结合《C专家编程》里提到的分析方法，应该是从未定义的标识符开始阅读，而不是从括号读起，之所以是未定义的标识符，是因为一个声明里面可能有多个标识符，但未定义的标识符只会有一个。 </p>
+<p>因此需要对这个法则进行修改，结合《C专家编程》里提到的分析方法，应该是从未定义的标识符开始阅读，而不是从括号读起，之所以是未定义的标识符，是因为一个声明里面可能有多个标识符，但未定义的标识符只会有一个。</p>
 <p>分析C语言的声明步骤：</p>
 <ul>
 <li>第1步：从左至右，找到第一个未定义的标识符。</li>
@@ -162,14 +162,16 @@
 <li>第2步：查看标识符右边的符号是<code>[</code>，说明x是一个具有3个元素的数组。</li>
 <li>第3步：查看左边的符号是<code>*</code>，转至第3步b。</li>
 <li>第3步b：说明数组中的元素都是指针，向左就是左括号了，将这个左括号结合到对应的右括号（也就是<code>(*x[3])</code>）作为新的标识符返回第2步 。</li>
-<li>第2步：查看右边的符号是<code>(</code>，说明指针是指向参数列表为空的函数的指针。 </li>
-<li>查看左边的符号，是<code>*</code>, 转至第3步b。 </li>
-<li>说明函数的返回值是指针，向左是左括号，将这个左括号结合到对应的右括号（也就是<code>(*(*x[3])())</code>）作为新的标识符返回第2步。 </li>
-<li>第2步：查看右边的符号是<code>[</code>，所以是指向具有五个元素的数组的指针。 </li>
-<li>第3步：查看左边的括号，既不是a情况，也不是b情况，跳至第4步。 </li>
-<li>第4步：数组的类型为char。 </li>
+<li>第2步：查看右边的符号是<code>(</code>，说明指针是指向参数列表为空的函数的指针。</li>
+<li>查看左边的符号，是<code>*</code>, 转至第3步b。</li>
+<li>说明函数的返回值是指针，向左是左括号，将这个左括号结合到对应的右括号（也就是<code>(*(*x[3])())</code>）作为新的标识符返回第2步。</li>
+<li>第2步：查看右边的符号是<code>[</code>，所以是指向具有五个元素的数组的指针。</li>
+<li>第3步：查看左边的括号，既不是a情况，也不是b情况，跳至第4步。</li>
+<li>第4步：数组的类型为char。</li>
 </ul>
-<p>所以以上的声明表示的是x是一个具有3个元素的数组，数组的每个元素都是一个指向函数的指针，函数的参数列表为空，返回值是指向一个具有5个元素的指针，元素的类型为char。 </p>
+<p>所以以上的声明表示的是x是一个具有3个元素的数组，数组的每个元素都是一个指向函数的指针，函数的参数列表为空，返回值是指向一个具有5个元素的指针，元素的类型为char。</p>
+<p>来个程序验证一下<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">char</span> *</span><br><span class="line">func()&#123;</span><br><span class="line">    <span class="keyword">char</span> arr[<span class="number">5</span>] = &#123;<span class="string">'1'</span>, <span class="string">'2'</span>, <span class="string">'3'</span>,<span class="string">'4'</span>,<span class="string">'5'</span>&#125;;</span><br><span class="line">    <span class="keyword">return</span> arr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> (*(*x[<span class="number">3</span>])())[<span class="number">5</span>]; <span class="comment">// x是一个长度为3的数组，元素是一个函数指针，函数的返回值是指向一个长度为5的char型数组指针。</span></span><br><span class="line"></span><br><span class="line">    x[<span class="number">0</span>] = &amp;func;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"x的总长度：%d \n"</span>,<span class="keyword">sizeof</span>(x));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"x元素的长度：%d \n"</span>,<span class="keyword">sizeof</span>(x[<span class="number">0</span>]));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"函数指针的长度：%d \n"</span>,<span class="keyword">sizeof</span>(<span class="keyword">void</span> *));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"x的元素个数：%d \n"</span>,<span class="keyword">sizeof</span>(x)/<span class="keyword">sizeof</span>(x[<span class="number">0</span>]));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">char</span> (*c)[<span class="number">5</span>] = (x[<span class="number">0</span>])();<span class="comment">//c是一个指向长度为5的char型数组的指针</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"c的总长度：%d \n"</span>,<span class="keyword">sizeof</span>(*c));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"c元素的长度：%d \n"</span>,<span class="keyword">sizeof</span>((*c)[<span class="number">0</span>]));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"char型的长度：%d \n"</span>,<span class="keyword">sizeof</span>(<span class="keyword">char</span>));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"c的第4个元素是：%c \n"</span>,(*c)[<span class="number">3</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"整体调用，第4个元素是：%c \n"</span>,(*(x[<span class="number">0</span>])())[<span class="number">3</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>运行结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">x的总长度：24</span><br><span class="line">x元素的长度：8</span><br><span class="line">函数指针的长度：8</span><br><span class="line">x的元素个数：3</span><br><span class="line">c的总长度：5</span><br><span class="line">c元素的长度：1</span><br><span class="line">chart性的长度：1</span><br><span class="line">c的第4个元素是：4</span><br><span class="line">整体调用，结果的第4个元素是：4</span><br></pre></td></tr></table></figure></p>
 <p>Try:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> <span class="keyword">char</span> *(*c[<span class="number">10</span>])(<span class="keyword">int</span> **p)</span><br></pre></td></tr></table></figure>
 <p><br></p>
@@ -178,9 +180,9 @@
 <p>三步：</p>
 <ol>
 <li><p>从未定义标识符开始，以顺时针方向移动，当遇到以下元素时，用相应的语言陈述替换它们：</p>
-<p>​    <code>[X]</code> or <code>[]</code> =&gt;  Array X size of… or Array undefined size of… </p>
-<p>​    <code>(type1, type2)</code> =&gt; function passing type1 and type2 returning… </p>
-<p>​    <code>*</code> =&gt;  pointer(s) to… </p>
+<p>​    <code>[X]</code> or <code>[]</code> =&gt;  Array X size of… or Array undefined size of…</p>
+<p>​    <code>(type1, type2)</code> =&gt; function passing type1 and type2 returning…</p>
+<p>​    <code>*</code> =&gt;  pointer(s) to…</p>
 </li>
 <li><p>继续以上步骤，直至覆盖所有的字符。</p>
 </li>
@@ -195,16 +197,27 @@
 <p>“str是一个……</p>
 </li>
 <li><p>从str开始以顺时针方向移动，遇到<code>[</code>，这意味着是一个数组</p>
-<p>‘’str是一个长度为10的数组，元素是……</p>
+<p>“str是一个长度为10的数组，元素是……</p>
 </li>
 <li><p>继续移动，遇到<code>*</code>,说明是指针</p>
-<p>‘’str是一个长度为10的数组，元素是指向……的指针</p>
+<p>“str是一个长度为10的数组，元素是指向……的指针</p>
 </li>
 <li><p>继续遇到了<code>;</code>，然后继续移动，遇到<code>char</code></p>
 <p>“str是一个长度为10的数组，元素是指向char的指针”</p>
 </li>
 <li><p>遍历完所有字符，解析完毕</p>
 </li>
+</ul>
+<p>以上的<code>char (*(*x[3])())[5];</code>亦可这样去处理<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">      +----------+</span><br><span class="line">      | +-----+  |</span><br><span class="line">      | |++   |  |</span><br><span class="line">      | |^|   |  |</span><br><span class="line"><span class="keyword">char</span> (*(*x[<span class="number">3</span>])())[<span class="number">5</span>];</span><br><span class="line"> ^    ^ ^ |   |  |</span><br><span class="line"> |    | +-+   |  |</span><br><span class="line"> |    +-------+  |</span><br><span class="line"> +---------------+</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>x是什么？<br>“x是一个……</li>
+<li>从x开始以顺时针方向移动，遇到<code>[</code>，这意味着是一个数组<br>“x是一个长度为3的数组，元素是……</li>
+<li>继续移动，遇到<code>*</code>,说明是指针<br>“x是一个长度为3的数组，元素是指向……的指针</li>
+<li>继续遇到<code>(</code>,说明是函数<br>“x是一个长度为3的数组，元素是指向函数的指针，函数是……</li>
+<li>继续遇到<code>*</code>，说明是指针<br>“x是一个长度为3的数组，元素是指向函数的指针，函数是参数列表为空，返回值是指向……的指针</li>
+<li>继续遇到<code>[</code>，说明是数组<br>“x是一个长度为3的数组，元素是指向函数的指针，函数是参数列表为空，返回值是指向长度为5的……类型元素的数组的指针</li>
+<li>继续遇到<code>char</code>,说明元素是char型<br>“x是一个长度为3的数组，元素是指向函数的指针，函数是参数列表为空，返回值是指向长度为5的char类型元素的数组的指针”</li>
+<li>遍历完毕</li>
 </ul>
 <p>Try:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2.</span>  <span class="keyword">char</span> *(*fp)( <span class="keyword">int</span>, <span class="keyword">float</span> *);</span><br><span class="line"><span class="number">3.</span>  <span class="keyword">void</span> (*signal(<span class="keyword">int</span>, <span class="keyword">void</span> (*fp)(<span class="keyword">int</span>)))(<span class="keyword">int</span>);</span><br></pre></td></tr></table></figure>
@@ -213,20 +226,20 @@
 <ol>
 <li>c是一个具有10个元素的数组，数组的元素都是函数指针，其所指向的函数是接受一个指向整型指针的指针，返回值是指向char的指针。</li>
 </ol>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">     +-----------------+</span><br><span class="line">     | +------+     +-+|</span><br><span class="line">     | |++    |     |++|</span><br><span class="line">     | |^|    |     |^||</span><br><span class="line"><span class="keyword">char</span> *(*c[<span class="number">10</span>])(<span class="keyword">int</span> **p);</span><br><span class="line">  ^  ^ ^ |    |    ^^ || </span><br><span class="line">  |  | +-+    |    |+-+|</span><br><span class="line">  |  +--------+    +--+|</span><br><span class="line">  +--------------------+</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">     +-----------------+</span><br><span class="line">     | +------+     +-+|</span><br><span class="line">     | |++    |     |++|</span><br><span class="line">     | |^|    |     |^||</span><br><span class="line"><span class="keyword">char</span> *(*c[<span class="number">10</span>])(<span class="keyword">int</span> **p);</span><br><span class="line">  ^  ^ ^ |    |    ^^ ||</span><br><span class="line">  |  | +-+    |    |+-+|</span><br><span class="line">  |  +--------+    +--+|</span><br><span class="line">  +--------------------+</span><br></pre></td></tr></table></figure>
 <ol start="2">
 <li>fp是一个函数指针，该函数接受一个整型和一个浮点型指针入参，返回值是指向char的指针。</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">     +--------------------+</span><br><span class="line">     | +---+              |</span><br><span class="line">     | |+-+|              |</span><br><span class="line">     | |^ ||              |</span><br><span class="line">char *(*fp)( int, float *);</span><br><span class="line"> ^   ^ ^  ||              |</span><br><span class="line"> |   | +--+|              |</span><br><span class="line"> |   +-----+              |</span><br><span class="line"> +------------------------+</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">     +--------------------+</span><br><span class="line">     | +---+              |</span><br><span class="line">     | |+-+|              |</span><br><span class="line">     | |^ ||              |</span><br><span class="line"><span class="keyword">char</span> *(*fp)( <span class="keyword">int</span>, <span class="keyword">float</span> *);</span><br><span class="line"> ^   ^ ^  ||              |</span><br><span class="line"> |   | +--+|              |</span><br><span class="line"> |   +-----+              |</span><br><span class="line"> +------------------------+</span><br></pre></td></tr></table></figure>
 <ol start="3">
 <li>signal是一个函数，该函数值一个接受一个整型和一个函数指针（该函数是入参是整型，返回值为空void），返回值是指向一个入参是整型，返回值是空void的函数指针。</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">      +-----------------------------+</span><br><span class="line">      |                  +---+      |</span><br><span class="line">      |  +---+           |+-+|      |</span><br><span class="line">      |  ^   |           |^ ||      |</span><br><span class="line">void (*signal(int, void (*fp)(int)))(int);</span><br><span class="line"> ^    ^      |      ^    ^  ||      |</span><br><span class="line"> |    +------+      |    +--+|      |</span><br><span class="line"> |                  +--------+      |</span><br><span class="line"> +----------------------------------+</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">      +-----------------------------+</span><br><span class="line">      |                  +---+      |</span><br><span class="line">      |  +---+           |+-+|      |</span><br><span class="line">      |  ^   |           |^ ||      |</span><br><span class="line"><span class="keyword">void</span> (*signal(<span class="keyword">int</span>, <span class="keyword">void</span> (*fp)(<span class="keyword">int</span>)))(<span class="keyword">int</span>);</span><br><span class="line"> ^    ^      |      ^    ^  ||      |</span><br><span class="line"> |    +------+      |    +--+|      |</span><br><span class="line"> |                  +--------+      |</span><br><span class="line"> +----------------------------------+</span><br></pre></td></tr></table></figure>
 <p><br><br><br></p>
 <p>参考：</p>
-<p><a href="https://blog.csdn.net/wangweixaut061/article/details/6549768" target="_blank" rel="noopener">C语言复杂声明解析</a>  </p>
-<p><a href="https://blog.csdn.net/jixuxjixu3/article/details/5824431" target="_blank" rel="noopener">c语言声明的分析方法</a>  </p>
-<p><a href="http://c-faq.com/decl/spiral.anderson.html" target="_blank" rel="noopener">The Clockwise/Spiral Rule</a>  </p>
+<p><a href="https://blog.csdn.net/wangweixaut061/article/details/6549768" target="_blank" rel="noopener">C语言复杂声明解析</a></p>
+<p><a href="https://blog.csdn.net/jixuxjixu3/article/details/5824431" target="_blank" rel="noopener">c语言声明的分析方法</a></p>
+<p><a href="http://c-faq.com/decl/spiral.anderson.html" target="_blank" rel="noopener">The Clockwise/Spiral Rule</a></p>
 
   </article>
 </div>
