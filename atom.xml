@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://byte-cloris.com/"/>
-  <updated>2018-08-02T16:51:28.267Z</updated>
+  <updated>2018-08-06T06:31:26.351Z</updated>
   <id>http://byte-cloris.com/</id>
   
   <author>
@@ -15,6 +15,42 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>学习PostgreSQL的查询机制</title>
+    <link href="http://byte-cloris.com/2018/08/03/learn_about_pg_query_processing/"/>
+    <id>http://byte-cloris.com/2018/08/03/learn_about_pg_query_processing/</id>
+    <published>2018-08-03T10:10:45.600Z</published>
+    <updated>2018-08-06T06:31:26.351Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>学习PostgreSQL的FDW</title>
+    <link href="http://byte-cloris.com/2018/08/03/learn_about_pgfdw/"/>
+    <id>http://byte-cloris.com/2018/08/03/learn_about_pgfdw/</id>
+    <published>2018-08-03T07:52:42.563Z</published>
+    <updated>2018-08-06T09:33:43.003Z</updated>
+    
+    <content type="html"><![CDATA[<p>实现一个FDW的核心是实现一组回调函数，有了这些回调函数的帮助, 在查询外部表对象的执行过程中就可以将运行逻辑切换至自定义的扩展代码中, 进而遵照PG的内部机制实现对外部数据源的访问。</p><p>目前PostgreSQL11 beta2，提供的FDW回调函数接口有39个。FDW的实现者需要根据外部数据源自身的能力（比如是否支持写操作，以及是否支持在外部数据源端执行join操作等等）对这些接口有选择地予以实现。</p><p>这些接口中, 最核心的接口有7个。无论外部数据源自身能力如何, 这7个接口是实现通过外部表对象访问该数据源的必须接口。它们的接口定义如下:</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*GetForeignRelSize_function)</span> <span class="params">(PlannerInfo *root, RelOptInfo *baserel, Oid foreigntableid)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*GetForeignPaths_function)</span> <span class="params">(PlannerInfo *root, RelOptInfo *baserel, Oid foreigntableid)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> ForeignScan *(*GetForeignPlan_function) (PlannerInfo *root, RelOptInfo *baserel,Oid foreigntableid, ForeignPath *best_path, List *tlist, List *scan_clauses, Plan *outer_plan);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*BeginForeignScan_function)</span> <span class="params">(ForeignScanState *node, <span class="keyword">int</span> eflags)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> TupleTableSlot *(*IterateForeignScan_function) (ForeignScanState *node);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*ReScanForeignScan_function)</span> <span class="params">(ForeignScanState *node)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*EndForeignScan_function)</span> <span class="params">(ForeignScanState *node)</span></span>;</span><br></pre></td></tr></table></figure><p>在PG中，查询语句经过以下5个子系统处理：</p><ol><li><p>Parser<br>用于将文本式的SQL命令转换成解析树</p></li><li><p>Analyzer/Analyser<br>用于执行解析树的语义分析并生成查询树</p></li><li>Rewriter<br>重写器用于根据规则系统中已存在的规则转换查询树</li><li>Planner<br>规划器生成可以从查询树中最有效地执行的计划树</li><li>Executor<br>执行器通过按计划树创建的顺序访问表和索引来执行查询</li></ol><p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180806173200.png" alt=""></p><p>可以整合成三个大阶段：  </p><ul><li>Parser: 包含对SQL的语法解析，语义校验，查询重写</li><li>Optimizer：生成查询计划</li><li>Executor：按照火山模型执行查询计划的算子并向上返回数据</li></ul><p>PG的FDW所需的7个回调函数主要是在Optimizer和Executor阶段进行“介入”:<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180806173225.png" alt=""></p><p>这7个回调函数详细的调用时间以及作用：</p><table><thead><tr><th style="text-align:left">回调函数</th><th style="text-align:left">在PG中的调用时机</th><th style="text-align:left">作用</th><th>详细描述</th></tr></thead><tbody><tr><td style="text-align:left">GetForeignRelSize</td><td style="text-align:left">优化器生成访问路径的过程中对外部表估算访问代价时</td><td style="text-align:left">提供外部表对于计算访问代价所需的基础数据，如表的元组数以及元组的平均长度,并将这些数据保存在输入参数baserel的字段”rows”以及”width”中</td><td><code>void GetForeignRelSize (PlannerInfo *root, RelOptInfo *baserel, Oid foreigntableid);</code>  <br>root是规划器的关于该查询的全局信息；baserel是规划器的关于该表的信息；foreigntableid是外部表在pg_class中的 OID （foreigntableid可以从规划器的数据结构中获得，但是为了减少工作量，这里直接显式地将它传递给函数）；<br>这个函数应该更新baserel-&gt;rows为表扫描根据限制条件完成了过滤后将返回的预期行数。baserel-&gt;rows的初始值只是一个常数的默认估计值，应该尽可能把它替换掉。如果该函数能够计算出一个平均结果行宽度的更好的估计值，该函数也可能选择更新baserel-&gt;width。</td></tr><tr><td style="text-align:left">GetForeignPaths</td><td style="text-align:left">生成对外部表的访问路径时</td><td style="text-align:left">生成对目标外部表的访问路径(通过PG中的接口createforeignscanpath()生成)</td><td><code>void GetForeignPaths (PlannerInfo *root, RelOptInfo *baserel, Oid foreigntableid);</code><br>参数和GetForeignRelSize相同；<br>这个函数必须为外部表上的扫描生成至少一个访问路径（ForeignPath节点），并且必须调用add_path把每一个这样的路径加入到baserel-&gt;pathlist中。我们推荐使用create_foreignscan_path来建立ForeignPath节点。该函数可以生成多个访问路径，例如一个具有合法pathkeys的路径表示一个预排序好的结果。每一个访问路径必须包含代价估计，并且能包含任何FDW的私有信息，这种信息被用来标识想要使用的指定扫描方法。</td></tr><tr><td style="text-align:left">GetForeignPlan</td><td style="text-align:left">优化器生成扫描外部表的查询计划节点时</td><td style="text-align:left">生成访问目标外部表的ForeignScan计划节点(通过PG中的接口make_foreignscan())</td><td><code>ForeignScan * GetForeignPlan (PlannerInfo *root, RelOptInfo *baserel, Oid foreigntableid, ForeignPath *best_path, List *tlist, List *scan_clauses, Plan *outer_plan);</code><br>参数和GetForeignRelSize的一样，外加选中的ForeignPath（在前面由GetForeignPaths、GetForeignJoinPaths或者GetForeignUpperPaths产生）、被计划节点发出的目标列表以及计划节点强制的限制子句以及被RecheckForeignScan执行的复查所使用的ForeignScan的外子计划（如果该路径是用于一个连接而非基本关系，则foreigntableid是InvalidOid）；<br>这个函数必须创建并返回一个ForeignScan计划节点，推荐使用make_foreignscan来建立ForeignScan节点。</td></tr><tr><td style="text-align:left">BeginForeignScan</td><td style="text-align:left">执行器即将开始执行ForeignScan算子，进行该算子相关的初始化时</td><td style="text-align:left">获取执行ForeignScan算子所需的信息，并将它们组织并保存在ForeignScanState中</td><td><code>void BeginForeignScan (ForeignScanState *node, int eflags);</code><br>它应该执行任何在扫描能够开始之前需要完成的初始化工作，但是并不开始执行真正的扫描（会在第一次调用IterateForeignScan时完成）。ForeignScanState节点已经被创建好了，但是它的fdw_state属性仍然为 NULL。关于要被扫描的表的信息可以通过ForeignScanState节点访问（特殊地，从底层的ForeignScan计划节点，它包含任何由GetForeignPlan提供的FDW私有信息）。eflags包含描述执行器对该计划节点操作模式的标志位。<br>注意当(eflags &amp; EXEC_FLAG_EXPLAIN_ONLY)为真时，这个函数不应该执行任何外部可见的动作；它应当只做最少的事情来创建对ExplainForeignScan 和EndForeignScan有效的节点状态</td></tr><tr><td style="text-align:left">IterateForeignScan</td><td style="text-align:left">执行ForeignScan算子过程中需要获取下一元组时</td><td style="text-align:left">读取外部数据源的一行数据，并将它组织为PG中的Tuple(即TupleTableSlot). 当该回调函数返回一个空的TupleTableSlot结构时, 迭代器停止迭代</td><td><code>TupleTableSlot * IterateForeignScan (ForeignScanState *node);</code><br>从外部源获得一行，将它放在一个元组表槽中返回（节点的ScanTupleSlot应当被用于此目的）。如果没有更多的行可用则返回 NULL。元组表槽设施允许一个物理的或者虚拟的元组被返回；在大部分情况下出于性能的考虑会倾向于选择后者。注意这是在一个短期存在的内存上下文中被调用的，该内存上下文会在调用之间被重置。如果需要长期存在的存储，需要在BeginForeignScan中创建内存上下文，或者使用节点的EState中的es_query_cxt。<br>如果提供了fdw_scan_tlist目标列表，被返回的行必须匹配它，如果没有提供则它们必须匹配被扫描的外部表的行类型。如果选择优化掉不需要的列，你应该在那些列的位置上插入控制或者生成一个忽略了那些列的fdw_scan_tlist列表。<br>注意PostgreSQL的执行器并不在乎被返回的行是否违背了定义在该外部表上的任何约束 — 但是规划器会在乎这一点，并且如果在外部表中有可见行不满足一个约束，规划器可能会错误地优化查询。如果当用户已经声明一个约束应该为真时它却被违背，最合适的处理可能是产生一个错误（就像在数据类型失配的情况下所作的那样）</td></tr><tr><td style="text-align:left">ReScanForeignScan</td><td style="text-align:left">执行Nested Loop过程中需要重置Inner Scan时(即Outter Scan需要向前推进一行时)</td><td style="text-align:left">将外部数据源的读取位置重置回最初的起始位置</td><td><code>void ReScanForeignScan (ForeignScanState *node);</code><br>注意扫描所依赖的任何参数可能已经改变了值，因此新扫描不一定会返回完全相同的行。</td></tr><tr><td style="text-align:left">EndForeignScan</td><td style="text-align:left">ForeignScan算子执行完成时</td><td style="text-align:left">释放整个ForeignScan算子执行过程中占用的外部资源或FDW中的资源</td><td><code>void EndForeignScan (ForeignScanState *node);</code><br>通常释放palloc过的内存并不重要，但是打开的文件和到远程服务器的连接等应该被清理。</td></tr></tbody></table><p>以上是必须实现的扫描相关的回调函数</p><p><br><br><br></p><p>参考：</p><p><a href="https://xiaowing.github.io/post/20180513_write_pgfdw_in_golang_part02/" target="_blank" rel="noopener">https://xiaowing.github.io/post/20180513_write_pgfdw_in_golang_part02/</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;实现一个FDW的核心是实现一组回调函数，有了这些回调函数的帮助, 在查询外部表对象的执行过程中就可以将运行逻辑切换至自定义的扩展代码中, 进而遵照PG的内部机制实现对外部数据源的访问。&lt;/p&gt;
+&lt;p&gt;目前PostgreSQL11 beta2，提供的FDW回调函数接口有39个
+      
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>解读C语言声明</title>
