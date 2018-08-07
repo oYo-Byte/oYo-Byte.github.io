@@ -8,13 +8,9 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>
-    学习PostgreSQL的查询机制 | oYo-Byte
+    文章分类 | oYo-Byte
   </title>
   <meta name="description" content="oYo-Byte&#39;s blog">
-  
-  <meta name="keywords" content="
-  
-  ">
   
   <meta name="author" content="oYo-Byte">
 
@@ -80,83 +76,91 @@
 </nav>
 
 <div class="main-container">
-  <header class="header-wrapper desktop-only">
-  <div class="container header-site-detail">
-    <ul class="header-toolbar">
-      <li class="clearfix">
-        <a href="/archives" class="header-toolbar-left"><i
-                  class="fa fa-file-text"></i> Posts </a>
-        <a href="/archives"
-           class="header-toolbar-right"> 6 </a>
-      </li>
-      <li>
-        <a href="/tags" class="header-toolbar-left"><i
-                  class="fa fa-tags"></i> Tags </a>
-        <a href="/tags"
-           class="header-toolbar-right"> 0 </a>
-      </li>
-      <li>
-        <a href="/categories" class="header-toolbar-left"><i
-                  class="fa fa-folder-open"></i> Categories </a>
-        <a href="/categories"
-           class="header-toolbar-right"> 2 </a>
-      </li>
-    </ul>
-    <h2 class="header-title">
-      <i class="fa fa-book text-muted"></i>
-      <a href="/">oYo-Byte</a>
-      
-      
-    </h2>
-  </div>
+  <div class="container-lg">
+  
 
-  <div class="container">
-    <div class="header-tab-wrapper clearfix">
-      <span class="header-tab header-tab-selected"><i class="fa fa-thumbs-o-up"></i> Like</span>
-      <span class="header-tab"><i class="fa fa-share-alt"></i> Share</span>
-      <span class="header-tab"><i class="fa fa-comments-o"></i> Discussion</span>
-      <span class="header-tab"><i class="fa fa-bookmark-o"></i> Bookmark </span>
-      <span class="header-tab"><i class="fa fa-smile-o"></i> Smile <i class="fa fa-caret-down"></i></span>
+<div class="blog-intro">
+  <div class="blog-intro-user">
+    <img class="avatar" src="https://avatars2.githubusercontent.com/u/8343269?s=460&amp;v=4">
+    <div class="user-name">
+      <div class="blog-title">oYo-Byte</div>
+      <div class="blog-author">oYo-Byte</div>
+        <ul class="user-detail mobile-only">
+    
+    <li>
+      <i class="fa fa-map-marker"></i>
+      Guangzhou
+    </li>
+    
+    <li>
+      <i class="fa fa-envelope-o"></i>
+      <a href="mailto:zhangzhijie@atlasdata.com.cn">zhangzhijie@atlasdata.com.cn</a>
+    </li>
+    
+    <li>
+      <i class="fa fa-link"></i>
+      <a href="http://byte-cloris.com">http://byte-cloris.com</a>
+    </li>
+  </ul>
+    </div>
+    <div class="blog-description">
+      oYo-Byte&#39;s blog
     </div>
   </div>
-</header>
 
+  <ul class="user-detail desktop-only">
+    
+    <li>
+      <i class="fa fa-map-marker"></i>
+      Guangzhou
+    </li>
+    
+    <li>
+      <i class="fa fa-envelope-o"></i>
+      <a href="mailto:zhangzhijie@atlasdata.com.cn">zhangzhijie@atlasdata.com.cn</a>
+    </li>
+    
+    <li>
+      <i class="fa fa-link"></i>
+      <a href="http://byte-cloris.com">http://byte-cloris.com</a>
+    </li>
+  </ul>
 
-<div class="post-container container">
-  <h3>
-    <i class="fa fa-user-o"></i>
-    oYo-Byte
-
-    <span class="post-date float-right" title="{{moment(1533291045600).format('MMM DD, YYYY, h:mm:ss A')}}">
-      <i class="fa fa-pencil-square-o"></i>
-      {{moment(1533291045600).fromNow()}}
-    </span>
-  </h3>
-
-  <article class="post-content">
-    <h1>学习PostgreSQL的查询机制</h1>
-    <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>在PostgreSQL中，查询语句经过以下5个子系统处理：</p>
-<ol>
-<li><p>Parser<br>用于将文本式的SQL命令转换成解析树</p>
-</li>
-<li><p>Analyzer/Analyser<br>用于执行解析树的语义分析并生成查询树</p>
-</li>
-<li>Rewriter<br>重写器用于根据规则系统中已存在的规则转换查询树</li>
-<li>Planner<br>规划器生成可以从查询树中最有效地执行的计划树</li>
-<li>Executor<br>执行器通过按计划树创建的顺序访问表和索引来执行查询</li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180806173200.png" alt=""></p>
-<h3 id="Parser"><a href="#Parser" class="headerlink" title="Parser"></a>Parser</h3><p>解析器把</p>
-
-  </article>
+  <div class="social-media desktop-only">
+    <h4>Social Media</h4>
+    <ul>
+      
+      <li class="social-media-item"><a href="https://github.com/oYo-Byte" target="_blank"><i class="fa fa-github"></i></a></li>
+      
+    </ul>
+  </div>
 </div>
 
 
+  <div class="blog-detail">
     
+<nav class="blog-detail-nav desktop-only">
+  <ul class="clearfix">
+    <li class="selected">
+      <a href="/">Overview</a></li>
+    <li class="">
+      <a href="/archives">Posts <span class="counter">6</span></a>
+    </li>
+    <li class="">
+      <a href="/categories">Categories <span
+                class="counter">2</span></a></li>
+    <li class="">
+      <a href="/tags">Tags <span class="counter">0</span></a></li>
+  </ul>
+</nav>
 
+    <div class="body-secondary">
 
-
-
+      
+      
+    </div>
+  </div>
+</div>
 </div>
 
 <div class="footer-wrapper container">
