@@ -148,10 +148,10 @@
     <li class="">
       <a href="/archives">Posts <span class="counter">6</span></a>
     </li>
-    <li class="selected">
+    <li class="">
       <a href="/categories">Categories <span
                 class="counter">2</span></a></li>
-    <li class="">
+    <li class="selected">
       <a href="/tags">Tags <span class="counter">4</span></a></li>
   </ul>
 </nav>
@@ -160,25 +160,108 @@
       <ul class="archive-list">
         
         <li class="archive-list-item">
-          <h2><a href="/2018/07/26/解读C语言声明/">解读C语言声明</a></h2>
+          <h2><a href="/2018/08/07/learn_about_pgfdw_part3/">学习PostgreSQL的FDW(#3)-其他函数说明</a></h2>
           <p>
-             C语言所有复杂的指针声明，都是由各种声明嵌套构成的。如何解读复杂指针声明呢？ 
- 右左法则（既著名又常用的方法 ） 
- 右左法则英文原文： 
- 
- The right-left rule: Start reading the declaration from the innermost paren...
+             上两篇文章主要介绍了实现FDW的7个必须实现的扫描相关的回调函数， 学习PostgreSQL的FDW(#1) ，  学习PostgreSQL的FDW(#2)-源码跟踪 ，这边就继续说说其余32个回调函数 
+   用于扫描外部连接的回调函数  如果一个 FDW 支持远程执行外部连接（而不是先把两个表...
           </p>
           <ul class="tag-list clearfix">
+            
+            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
             
           </ul>
           <div class="post-info">
             <span>
               
-              <a class="category-link" href="/categories/C/"><i class="fa fa-folder-open"></i> C</a>
+              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
               
             </span>
-            <span><i class="fa fa-tag"></i> 0 </span>
-            <span>Published {{moment(1532575103922).fromNow()}}</span>
+            <span><i class="fa fa-tag"></i> 2 </span>
+            <span>Published {{moment(1533635241871).fromNow()}}</span>
+          </div>
+        </li>
+        
+        <li class="archive-list-item">
+          <h2><a href="/2018/08/07/learn_about_pgfdw_part2/">学习PostgreSQL的FDW(#2)-源码跟踪</a></h2>
+          <p>
+             上篇大概介绍了FDW必须实现的7个回调函数 学习PostgreSQL的FDW(#1) ，本篇将从源码跟踪，这7个回调函数的调用时机，以PostgreSQL11beta2的postgres_fdw为例，分析PostgreSQL在查询外部表时，究竟做了什么。 
+   测试前准备  IP为192.168...
+          </p>
+          <ul class="tag-list clearfix">
+            
+            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/gdb/">gdb</a></li>
+            
+          </ul>
+          <div class="post-info">
+            <span>
+              
+              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
+              
+            </span>
+            <span><i class="fa fa-tag"></i> 3 </span>
+            <span>Published {{moment(1533608145504).fromNow()}}</span>
+          </div>
+        </li>
+        
+        <li class="archive-list-item">
+          <h2><a href="/2018/08/03/learn_about_pgfdw/">学习PostgreSQL的FDW(#1)</a></h2>
+          <p>
+             实现一个FDW的核心是实现一组回调函数，有了这些回调函数的帮助, 在查询外部表对象的执行过程中就可以将运行逻辑切换至自定义的扩展代码中, 进而遵照PG的内部机制实现对外部数据源的访问。 
+ 目前PostgreSQL11 beta2，提供的FDW回调函数接口有39个。FDW的实现者需要根据外部数据源...
+          </p>
+          <ul class="tag-list clearfix">
+            
+            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
+            
+          </ul>
+          <div class="post-info">
+            <span>
+              
+              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
+              
+            </span>
+            <span><i class="fa fa-tag"></i> 2 </span>
+            <span>Published {{moment(1533282762563).fromNow()}}</span>
+          </div>
+        </li>
+        
+        <li class="archive-list-item">
+          <h2><a href="/2018/07/25/PostgreSQL使用oracle_fdw与Oracle查询性能对比/">PostgreSQL使用oracle_fdw与Oracle查询性能对比</a></h2>
+          <p>
+               在PostgreSQL中使用oracle_fdw    安装oracle_fdw插件  
+ 安装前要求： 
+ 
+ 
+ 全部功能要求PostgreSQL9.3及以上 
+ Oracle client要求10.1以上 
+ 确保PostgreSQL配置了 --without-ldap  
+ 确保 pg...
+          </p>
+          <ul class="tag-list clearfix">
+            
+            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/oracle/">oracle</a></li>
+            
+          </ul>
+          <div class="post-info">
+            <span>
+              
+              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
+              
+            </span>
+            <span><i class="fa fa-tag"></i> 3 </span>
+            <span>Published {{moment(1532489392892).fromNow()}}</span>
           </div>
         </li>
         
