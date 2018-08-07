@@ -87,7 +87,7 @@
         <a href="/archives" class="header-toolbar-left"><i
                   class="fa fa-file-text"></i> Posts </a>
         <a href="/archives"
-           class="header-toolbar-right"> 4 </a>
+           class="header-toolbar-right"> 5 </a>
       </li>
       <li>
         <a href="/tags" class="header-toolbar-left"><i
@@ -135,7 +135,19 @@
 
   <article class="post-content">
     <h1>学习PostgreSQL的查询机制</h1>
-    
+    <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>在PostgreSQL中，查询语句经过以下5个子系统处理：</p>
+<ol>
+<li><p>Parser<br>用于将文本式的SQL命令转换成解析树</p>
+</li>
+<li><p>Analyzer/Analyser<br>用于执行解析树的语义分析并生成查询树</p>
+</li>
+<li>Rewriter<br>重写器用于根据规则系统中已存在的规则转换查询树</li>
+<li>Planner<br>规划器生成可以从查询树中最有效地执行的计划树</li>
+<li>Executor<br>执行器通过按计划树创建的顺序访问表和索引来执行查询</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180806173200.png" alt=""></p>
+<h3 id="Parser"><a href="#Parser" class="headerlink" title="Parser"></a>Parser</h3><p>解析器把</p>
+
   </article>
 </div>
 
