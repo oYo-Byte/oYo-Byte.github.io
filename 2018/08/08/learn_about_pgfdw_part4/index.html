@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>
+    学习PostgreSQL的FDW(#3)-其他函数说明 II | oYo-Byte
+  </title>
+  <meta name="description" content="oYo-Byte&#39;s blog">
+  
+  <meta name="keywords" content="
+  PostgreSQL,FDW
+  ">
+  
+  <meta name="author" content="oYo-Byte">
+
+  <meta http-equiv="Cache-Control" content="no-transform"/>
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+  <link rel="icon" type="image/x-icon" href="https://assets-cdn.github.com/favicon.ico">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+
+  
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/1.0.25-csp/vue.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
+</head>
+
+<body id="replica-app">
+
+<nav class="navbar-wrapper">
+  <div class="navbar">
+    <div class="container clearfix">
+      <a href="/" class="navbar-logo"><i class="fa fa-github"></i></a>
+
+      <div class="navbar-search float-left desktop-only">
+        <div class="navbar-search-form">
+          <label for="gsc-i-id1">This website</label>
+          <div id="google-search">
+            <gcse:search></gcse:search>
+          </div>
+        </div>
+      </div>
+
+      <ul class="navbar-nav float-left">
+        
+        <li><a href="/archives">Archives</a></li>
+        
+        
+        <li><a href="/categories">Categories</a></li>
+        
+        
+        <li><a href="/tags">Tags</a></li>
+        
+        
+        <li class="desktop-only"><a href="/atom.xml" target="_blank">RSS</a></li>
+        
+      </ul>
+
+      <ul class="navbar-nav user-nav float-right desktop-only">
+        <li class="user-nav-notification">
+          <a><span class="user-nav-unread"></span><i class="fa fa-bell"></i></a>
+        </li>
+        <li>
+          <a><i class="fa fa-plus"></i> <i class="fa fa-caret-down"></i></a>
+        </li>
+        <li class="user-nav-logo">
+          <a><img src="https://avatars2.githubusercontent.com/u/8343269?s=460&amp;v=4"> <i class="fa fa-caret-down"></i></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="main-container">
+  <header class="header-wrapper desktop-only">
+  <div class="container header-site-detail">
+    <ul class="header-toolbar">
+      <li class="clearfix">
+        <a href="/archives" class="header-toolbar-left"><i
+                  class="fa fa-file-text"></i> Posts </a>
+        <a href="/archives"
+           class="header-toolbar-right"> 7 </a>
+      </li>
+      <li>
+        <a href="/tags" class="header-toolbar-left"><i
+                  class="fa fa-tags"></i> Tags </a>
+        <a href="/tags"
+           class="header-toolbar-right"> 4 </a>
+      </li>
+      <li>
+        <a href="/categories" class="header-toolbar-left"><i
+                  class="fa fa-folder-open"></i> Categories </a>
+        <a href="/categories"
+           class="header-toolbar-right"> 2 </a>
+      </li>
+    </ul>
+    <h2 class="header-title">
+      <i class="fa fa-book text-muted"></i>
+      <a href="/">oYo-Byte</a>
+      
+      
+    </h2>
+  </div>
+
+  <div class="container">
+    <div class="header-tab-wrapper clearfix">
+      <span class="header-tab header-tab-selected"><i class="fa fa-thumbs-o-up"></i> Like</span>
+      <span class="header-tab"><i class="fa fa-share-alt"></i> Share</span>
+      <span class="header-tab"><i class="fa fa-comments-o"></i> Discussion</span>
+      <span class="header-tab"><i class="fa fa-bookmark-o"></i> Bookmark </span>
+      <span class="header-tab"><i class="fa fa-smile-o"></i> Smile <i class="fa fa-caret-down"></i></span>
+    </div>
+  </div>
+</header>
+
+
+<div class="post-container container">
+  <h3>
+    <i class="fa fa-user-o"></i>
+    oYo-Byte
+
+    <span class="post-date float-right" title="{{moment(1533721954432).format('MMM DD, YYYY, h:mm:ss A')}}">
+      <i class="fa fa-pencil-square-o"></i>
+      {{moment(1533721954432).fromNow()}}
+    </span>
+  </h3>
+
+  <article class="post-content">
+    <h1>学习PostgreSQL的FDW(#3)-其他函数说明 II</h1>
+    <p>继上篇<a href="https://oyo-byte.github.io/2018/08/07/learn_about_pgfdw_part3/" target="_blank" rel="noopener">学习PostgreSQL的FDW(#3)-其他函数说明 I</a>，继续说说其余回调函数</p>
+<h2 id="用于行锁定的FDW回调函数"><a href="#用于行锁定的FDW回调函数" class="headerlink" title="用于行锁定的FDW回调函数"></a>用于行锁定的FDW回调函数</h2><p>如果一个FDW 希望支持<em>后期行锁定</em>，必须提供以下回调函数：</p>
+<ul>
+<li>GetForeignRowMarkType</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">RowMarkType</span><br><span class="line">GetForeignRowMarkType (RangeTblEntry *rte,</span><br><span class="line">                       LockClauseStrength strength);</span><br></pre></td></tr></table></figure>
+<p>报告要对一个外部表使用哪个行标记选项。rte是该表的RangeTblEntry节点，而strength描述FOR UPDATE/SHARE子句（如果有）所要求的锁长度。结果必须是RowMarkType枚举类型的一个成员。</p>
+<p>这个函数在查询规划期间会为每一个出现在UPDATE、DELETE或者SELECT FOR UPDATE/SHARE查询中的外部表调用，并且该外部表不是UPDATE和DELETE的目标。</p>
+<p>如果<code>GetForeignRowMarkType</code>指针被设置为NULL，将总是使用ROW_MARK_COPY选项（这意味着将不会调用RefetchForeignRow，因此也不必提供它）。</p>
+<ul>
+<li>RefetchForeignRow </li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HeapTuple</span><br><span class="line">RefetchForeignRow(EState *estate,</span><br><span class="line">                  ExecRowMark *erm,</span><br><span class="line">                  Datum rowid,</span><br><span class="line">                  <span class="keyword">bool</span> *updated);</span><br></pre></td></tr></table></figure>
+<p>从外部表中重新取得一个元组，如有必要先锁定它。estate是该查询的全局执行状态。erm是描述目标外部表以及要获取的行锁类型（如果有）的ExecRowMark结构。rowid标识要取得的元组。updated是一个输出参数。</p>
+<p>这个函数应该返回被取得的元组的一个已经分配内存的拷贝，如果无法得到行锁则返回NULL。要获得的行锁由erm-&gt;markType定义，它是之前由<code>GetForeignRowMarkType</code>返回的值（ROW_MARK_REFERENCE标识只重新取得元组但不获得任何锁，这个例程将不会看到ROW_MARK_COPY）。</p>
+<p>此外，如果取得的是一个更新过的版本而不是之前获得的同一版本，*updated应被设置为true（如果 FDW 无法确定这一点，推荐总是返回true）。</p>
+<p>注意在默认情况下，获取行锁失败应该导致产生错误。如果erm-&gt;waitPolicy指定了SKIP LOCKED，只有返回NULL才是合适的。</p>
+<p>rowid是要被重新取得的行之前读到的ctid值。尽管rowid值被作为Datum传递，但是目前它只能被读作tid。选择该函数 API 是希望未来能允许其他的行 ID 数据类型。</p>
+<p>如果<code>RefetchForeignRow</code>指针被设置为NULL，重新取得行的尝试将会失败并伴随有一个错误消息。</p>
+<ul>
+<li>RecheckForeignScan </li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span></span><br><span class="line">RecheckForeignScan(ForeignScanState *node,</span><br><span class="line">                   TupleTableSlot *slot);</span><br></pre></td></tr></table></figure>
+<p>重新检查之前返回的元组是否仍然匹配相关的扫描和连接条件，并且可能提供该元组的一个修改版本。对于不执行连接下推的外部数据包装器，通常把这设置为NULL并且恰当地设置fdw_recheck_quals会更方便。不过当外部连接被下推时，把与所有基表相关的检查重新应用在结果元组上是不够的，即便所有需要的属性都存在也是如此，因为匹配某个条件失败可能会导致某些属性变成 NULL，而不是没有元组被返回。<code>RecheckForeignScan</code>能够重新检查条件，并且在它们仍然满足时返回真，否则返回假，但是它也能够在提供的槽中存储一个替换元组。</p>
+<p>要实现连接下推，外部数据包装器通常将构造一个可替代的本地连接计划，它只被用来做重新检查。这将变成ForeignScan的外子计划。在需要一次重新检查时，这个子计划可以被执行并且结果元组可以被存储在槽中。这个计划不需要效率很高，因为不会有基表返回超过一行。例如，它可以把所有的连接实现为嵌套循环。函数<code>GetExistingLocalJoinPath</code>可以被用来在已有的路径中搜索合适的本地连接路径，它可以被用作替换的本地连接计划。<code>GetExistingLocalJoinPath</code>会在指定连接关系的路径列表中搜索一个非参数化路径（如果没有找到这样的路径，它会返回 NULL，这种情况下外部数据包装器可以自行构造本地路径或者可以选择不为这个连接创建访问路径）。</p>
+<h2 id="EXPLAIN-相关FDW回调函数"><a href="#EXPLAIN-相关FDW回调函数" class="headerlink" title="EXPLAIN 相关FDW回调函数"></a>EXPLAIN 相关FDW回调函数</h2><ul>
+<li>ExplainForeignScan</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">ExplainForeignScan(ForeignScanState *node,</span><br><span class="line">                   ExplainState *es);</span><br></pre></td></tr></table></figure>
+<p>为一个外部表扫描打印额外的EXPLAIN输出。这个函数可以调用ExplainPropertyText和相关函数来向EXPLAIN输出中增加域。es中的标志域可以被用来决定什么将被打印，并且ForeignScanState节点的状态可以被检查来为EXPLAIN ANALYZE提供运行时统计数据。</p>
+<p>如果<code>ExplainForeignScan</code>指针被设置为NULL，在EXPLAIN期间不会打印任何额外的信息。</p>
+<ul>
+<li>ExplainForeignModify </li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">ExplainForeignModify(ModifyTableState *mtstate,</span><br><span class="line">                     ResultRelInfo *rinfo,</span><br><span class="line">                     List *fdw_private,</span><br><span class="line">                     <span class="keyword">int</span> subplan_index,</span><br><span class="line">                     struct ExplainState *es);</span><br></pre></td></tr></table></figure>
+<p>为一个外部表更新打印额外的EXPLAIN输出。这个函数可以调用ExplainPropertyText和相关函数来向EXPLAIN输出中增加域。es中的标志域可以被用来决定什么将被打印，并且ModifyTableState节点的状态可以被检查来为EXPLAIN ANALYZE提供运行时统计数据。前四个参数和<code>BeginForeignModify</code>相同。</p>
+<p>如果<code>ExplainForeignModify</code>指针被设置为NULL，在EXPLAIN期间不会打印任何额外的信息。</p>
+<ul>
+<li>ExplainDirectModify</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">ExplainDirectModify(ForeignScanState *node,</span><br><span class="line">                    ExplainState *es);</span><br></pre></td></tr></table></figure>
+<p>为远程服务器上的直接修改打印额外的EXPLAIN输出。这个函数可以调用ExplainPropertyText和相关函数来为EXPLAIN输出增加域。es中的标志域可以被用来判断要打印什么，并且在EXPLAIN ANALYZE情况中可以观察ForeignScanState节点的状态来提供运行时统计信息。</p>
+<p>如果<code>ExplainDirectModify</code>指针被设置为NULL，EXPLAIN期间不会打印出额外的信息。</p>
+<h2 id="ANALYZE-相关FDW回调函数"><a href="#ANALYZE-相关FDW回调函数" class="headerlink" title="ANALYZE 相关FDW回调函数"></a>ANALYZE 相关FDW回调函数</h2><ul>
+<li>AnalyzeForeignTable</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span></span><br><span class="line">AnalyzeForeignTable (Relation relation,</span><br><span class="line">                     AcquireSampleRowsFunc *func,</span><br><span class="line">                     BlockNumber *totalpages);</span><br></pre></td></tr></table></figure>
+<p>当ANALYZE被执行在一个外部表上时会调用这个函数。如果FDW可以为这个外部表收集统计信息，它会返回true并提供一个函数指针，该函数将将从func中的表上收集采样行，外加totalpages中页面中的表尺寸估计值。否则，返回false。</p>
+<p>如果FDW不支持为任何表收集统计信息，<code>AnalyzeForeignTable</code>指针可以被设置为NULL。</p>
+<p>如果提供，采样收集函数必须具有签名</p>
+<ul>
+<li>AcquireSampleRowsFunc</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span></span><br><span class="line">AcquireSampleRowsFunc(Relation relation,</span><br><span class="line">                      <span class="keyword">int</span> elevel,</span><br><span class="line">                      HeapTuple *rows,</span><br><span class="line">                      <span class="keyword">int</span> targrows,</span><br><span class="line">                      <span class="keyword">double</span> *totalrows,</span><br><span class="line">                      <span class="keyword">double</span> *totaldeadrows);</span><br></pre></td></tr></table></figure>
+<p>应该从该表上收集最多targrows行的一个随机采样并将它存放到调用者提供的rows数组中。实际被收集的行的数量必须被返回。另外，将表中有效行和死亡行的总数存储到输出参数totalrows和totaldeadrows中（如果FDW没有死亡行的概念，将totaldeadrows设置为 0 ）。</p>
+<h2 id="IMPORT-FOREIGN-SCHEMA-回调函数"><a href="#IMPORT-FOREIGN-SCHEMA-回调函数" class="headerlink" title="IMPORT FOREIGN SCHEMA 回调函数"></a>IMPORT FOREIGN SCHEMA 回调函数</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List *</span><br><span class="line">ImportForeignSchema (ImportForeignSchemaStmt *stmt, Oid serverOid);</span><br></pre></td></tr></table></figure>
+<p>取得一个外部表创建命令的列表。在执行<code>IMPORT FOREIGN SCHEMA</code>时会调用这个函数，并且会把该语句的解析树以及要使用的外部服务器的 OID 传递给它。它应该返回一个 C 字符串的列表，每一个必须包含一个<code>CREATE FOREIGN TABLE</code>命令。这些命令将被核心服务器所解析和执行。</p>
+<p>在ImportForeignSchemaStmt结构中，remote_schema是要从其中导入这些表的远程模式的名称。list_type标识如何过滤表名：FDW_IMPORT_SCHEMA_ALL表示该远程模式中的所有表都应该被导入（这种情况下table_list为空），FDW_IMPORT_SCHEMA_LIMIT_TO表示只包括table_list中列出的表，而FDW_IMPORT_SCHEMA_EXCEPT则表示排除table_list中列出的表。options是一个用于该导入处理的选项列表。选项的含义由 FDW 决定。例如，一个 FDW 可以用一个选项来定义是否应该导入列的NOT NULL属性。这些选项不需要与那些 FDW 支持的数据库对象选项有什么关系。</p>
+<p>FDW 可能会忽略ImportForeignSchemaStmt的local_schema域，因为核心服务器会自动地向解析好的<code>CREATE FOREIGN TABLE</code>命令中插入本地模式的名称。</p>
+<p>FDW 也不必担心实现list_type以及table_list所指定的过滤，因为核心服务器将自动根据那些选项跳过为被排除的表所返回的命令。不过，起初就避免为被排除的表创建命令当然更好。函数<code>IsImportableForeignTable()</code>可以用来测试一个给定的外部表名是否能通过该过滤器。</p>
+<p>如果 FDW 不支持导入表定义，<code>ImportForeignSchema</code>指针可以被设置为NULL。</p>
+<h2 id="并行执行-回调函数"><a href="#并行执行-回调函数" class="headerlink" title="并行执行 回调函数"></a>并行执行 回调函数</h2><p>ForeignScan节点可以选择支持并行执行。一个并行的 ForeignScan将在多个进程中执行， 并且在相互合作的进程中每个行必须只被返回一次。要做到这样， 进程可以通过动态共享内存的固定尺寸块来协作。并不保证在每一个进程中这部份共享内存都被映射到相同的地址， 因此必须不能包含指针。下面的函数都是可选的，但是如果要支持并行执行需要提供大多数函数。</p>
+<ul>
+<li>IsForeignScanParallelSafe<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span></span><br><span class="line">IsForeignScanParallelSafe(PlannerInfo *root, RelOptInfo *rel,</span><br><span class="line">                          RangeTblEntry *rte);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>测试一个扫描是否可以在一个并行工作者中被执行。只有当规划器相信可以使用并行计划时才会调用这个函数，如果该扫描在并行工作者中可以安全运行这个函数应该返回真。如果远程数据源具有事务语义，情况通常都不是这样，除非工作者到数据的连接能够以某种方式共享与领导者相同的事务环境。</p>
+<p>如果没有定义这个函数，则假定该扫描必须被放置在并行领导者中。注意返回真并不意味着该扫描本身可以被并行完成，只是说明该扫描可以在一个并行工作者中执行。因此，即便当不支持并行执行时，定义这个方法也是有用的。</p>
+<ul>
+<li>EstimateDSMForeignScan</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Size</span><br><span class="line">EstimateDSMForeignScan(ForeignScanState *node, ParallelContext *pcxt);</span><br></pre></td></tr></table></figure>
+<p>估算并行操作所需的动态共享内存的数量。这可能比实际要用的数量更大，但是绝不能更小。返回值的单位是字节。该函数是可选的，如果不需要可以省略；但是如果省略它， 接下来的三个函数也必须省略，因为没有分配共享内存将给FDW使用。</p>
+<ul>
+<li>InitializeDSMForeignScan</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">InitializeDSMForeignScan(ForeignScanState *node, ParallelContext *pcxt,</span><br><span class="line">                         <span class="keyword">void</span> *coordinate);</span><br></pre></td></tr></table></figure>
+<p>初始化并行操作所需的动态共享内存。coordinate指向共享内存区域， 其大小等于EstimateDSMForeignScan的返回值。 该函数是可选的，如果不需要可以省略。</p>
+<ul>
+<li>ReInitializeDSMForeignScan</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">ReInitializeDSMForeignScan(ForeignScanState *node, ParallelContext *pcxt,</span><br><span class="line">                           <span class="keyword">void</span> *coordinate);</span><br></pre></td></tr></table></figure>
+<p>当外部扫描计划节点即将被重新扫描时，重新初始化并行操作所需的动态共享内存。该函数是可选的，如果不需要可以省略。推荐的做法是此函数仅重置共享状态， 而<code>ReScanForeignScan</code>函数仅重置本地状态。目前， 这个函数会在<code>ReScanForeignScan</code>之前调用，但最好不要依赖这个顺序。</p>
+<ul>
+<li>InitializeWorkerForeignScan</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">InitializeWorkerForeignScan(ForeignScanState *node, shm_toc *toc,</span><br><span class="line">                            <span class="keyword">void</span> *coordinate);</span><br></pre></td></tr></table></figure>
+<p>基于<code>InitializeDSMForeignScan</code>期间领导者设置的共享状态初始化并行工作者的本地状态。这个函数是可选的， 如果不需要可以省略。</p>
+<ul>
+<li>ShutdownForeignScan</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">ShutdownForeignScan(ForeignScanState *node);</span><br></pre></td></tr></table></figure>
+<p>预计节点将不会执行完成时释放资源。这在所有情况下都不被调用；有时， <code>EndForeignScan</code>可能会在没有先调用此函数的情况下调用。由于并行查询使用的DSM段在调用此回调后即被销毁， 因此希望在DSM段消失之前采取某些操作的外部数据包装器应实现此方法。</p>
+<h2 id="用于路径重新参数化-的回调函数"><a href="#用于路径重新参数化-的回调函数" class="headerlink" title="用于路径重新参数化 的回调函数"></a>用于路径重新参数化 的回调函数</h2><ul>
+<li>ReparameterizeForeignPathByChild</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List *</span><br><span class="line">ReparameterizeForeignPathByChild(PlannerInfo *root, List *fdw_private,</span><br><span class="line">                                 RelOptInfo *child_rel);</span><br></pre></td></tr></table></figure>
+<p>在将由给定子关系child_rel的最顶层父级参数化的路径转换为由子关系参数化时，调用此函数。该函数用于重新参数化任何路径或转换保存在给定ForeignPath节点的fdw_private 成员中的任何表达式。回调根据需要使用reparameterize_path_by_child，adjust_appendrel_attrs也可以adjust_appendrel_attrs_multilevel。</p>
+
+  </article>
+</div>
+
+
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<script src="/js/md5.min.js"></script>
+<div class='container' id="gitalk-container"></div>
+<script>
+    var gitalk = new Gitalk({
+        clientID: '0f95488e2c5e12bc2a2a',
+        clientSecret: 'b01836c08c02e727359d1c8df682e8b65fe41de1',
+        repo: 'blog_gitalk',
+        owner: 'oYo-Byte',
+        admin: ['oYo-Byte'],
+		id: md5(location.pathname),
+        distractionFreeMode: true,
+    })
+    gitalk.render('gitalk-container')
+</script>
+
+
+
+
+</div>
+
+<div class="footer-wrapper container">
+  <footer class="footer clearfix">
+    <a href="http://byte-cloris.com" class="footer-logo">
+      <i class="fa fa-github"></i>
+    </a>
+    <ul class="footer-social-link">
+      <li>© 2018 oYo-Byte</li>
+      <li><a href="http://byte-cloris.com">Home</a></li>
+      
+      <li><a href="https://github.com/oYo-Byte">Github</a></li>
+      
+    </ul>
+    <div class="footer-theme-info">
+      Theme <a href="//github.com/sabrinaluo/hexo-theme-replica">Replica</a>
+      by <a href="//github.com/sabrinaluo">Hiitea</a> ❤ Powered by Hexo
+    </div>
+  </footer>
+</div>
+
+
+
+
+<script src="/js/main.js"></script>
+
+</body>
+</html>

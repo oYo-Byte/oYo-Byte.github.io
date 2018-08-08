@@ -146,7 +146,7 @@
     <li class="">
       <a href="/">Overview</a></li>
     <li class="">
-      <a href="/archives">Posts <span class="counter">6</span></a>
+      <a href="/archives">Posts <span class="counter">7</span></a>
     </li>
     <li class="">
       <a href="/categories">Categories <span
@@ -160,7 +160,35 @@
       <ul class="archive-list">
         
         <li class="archive-list-item">
-          <h2><a href="/2018/08/07/learn_about_pgfdw_part3/">学习PostgreSQL的FDW(#3)-其他函数说明</a></h2>
+          <h2><a href="/2018/08/08/learn_about_pgfdw_part4/">学习PostgreSQL的FDW(#3)-其他函数说明 II</a></h2>
+          <p>
+             继上篇 学习PostgreSQL的FDW(#3)-其他函数说明 I ，继续说说其余回调函数 
+   用于行锁定的FDW回调函数  如果一个FDW 希望支持 后期行锁定 ，必须提供以下回调函数： 
+ 
+ GetForeignRowMarkType 
+ 
+      1   2   3       R...
+          </p>
+          <ul class="tag-list clearfix">
+            
+            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
+            
+          </ul>
+          <div class="post-info">
+            <span>
+              
+              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
+              
+            </span>
+            <span><i class="fa fa-tag"></i> 2 </span>
+            <span>Published {{moment(1533721954432).fromNow()}}</span>
+          </div>
+        </li>
+        
+        <li class="archive-list-item">
+          <h2><a href="/2018/08/07/learn_about_pgfdw_part3/">学习PostgreSQL的FDW(#3)-其他函数说明 I</a></h2>
           <p>
              上两篇文章主要介绍了实现FDW的7个必须实现的扫描相关的回调函数， 学习PostgreSQL的FDW(#1) ，  学习PostgreSQL的FDW(#2)-源码跟踪 ，这边就继续说说其余32个回调函数 
    用于扫描外部连接的回调函数  如果一个 FDW 支持远程执行外部连接（而不是先把两个表...
