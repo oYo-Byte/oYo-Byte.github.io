@@ -8,7 +8,7 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>
-    学习PostgreSQL的FDW(#3)-其他函数说明 II | oYo-Byte
+    学习PostgreSQL的FDW(#4)-其他函数说明 II | oYo-Byte
   </title>
   <meta name="description" content="oYo-Byte&#39;s blog">
   
@@ -134,7 +134,7 @@
   </h3>
 
   <article class="post-content">
-    <h1>学习PostgreSQL的FDW(#3)-其他函数说明 II</h1>
+    <h1>学习PostgreSQL的FDW(#4)-其他函数说明 II</h1>
     <p>继上篇<a href="https://oyo-byte.github.io/2018/08/07/learn_about_pgfdw_part3/" target="_blank" rel="noopener">学习PostgreSQL的FDW(#3)-其他函数说明 I</a>，继续说说其余回调函数</p>
 <h2 id="用于行锁定的FDW回调函数"><a href="#用于行锁定的FDW回调函数" class="headerlink" title="用于行锁定的FDW回调函数"></a>用于行锁定的FDW回调函数</h2><p>如果一个FDW 希望支持<em>后期行锁定</em>，必须提供以下回调函数：</p>
 <ul>
