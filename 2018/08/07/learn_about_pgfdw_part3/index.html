@@ -135,7 +135,7 @@
 
   <article class="post-content">
     <h1>学习PostgreSQL的FDW(#3)-其他函数说明 I</h1>
-    <p>上两篇文章主要介绍了实现FDW的7个必须实现的扫描相关的回调函数，<a href="https://oyo-byte.github.io/2018/08/03/learn_about_pgfdw/" target="_blank" rel="noopener">学习PostgreSQL的FDW(#1)</a>，<br><a href="https://oyo-byte.github.io/2018/08/07/learn_about_pgfdw_part2/" target="_blank" rel="noopener">学习PostgreSQL的FDW(#2)-源码跟踪</a>，这边就继续说说其余32个回调函数</p>
+    <p>上两篇文章主要介绍了实现FDW的7个必须实现的扫描相关的回调函数，<a href="https://oyo-byte.github.io/2018/08/03/learn_about_pgfdw/">学习PostgreSQL的FDW(#1)</a>，<br><a href="https://oyo-byte.github.io/2018/08/07/learn_about_pgfdw_part2/">学习PostgreSQL的FDW(#2)-源码跟踪</a>，这边就继续说说其余32个回调函数</p>
 <h2 id="用于扫描外部连接的回调函数"><a href="#用于扫描外部连接的回调函数" class="headerlink" title="用于扫描外部连接的回调函数"></a>用于扫描外部连接的回调函数</h2><p>如果一个 FDW 支持远程执行外部连接（而不是先把两个表的数据取到本地然后做本地连接），它应该提供这个回调函数:<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">GetForeignJoinPaths (PlannerInfo *root,</span><br><span class="line">                     RelOptInfo *joinrel,</span><br><span class="line">                     RelOptInfo *outerrel,</span><br><span class="line">                     RelOptInfo *innerrel,</span><br><span class="line">                     JoinType jointype,</span><br><span class="line">                     JoinPathExtraData *extra);</span><br></pre></td></tr></table></figure></p>
 <p>它为两个（或更多）同属于一台外部服务器的外部表的连接创建可能的访问路径。这个可选的函数会在查询规划过程中被调用。和<code>GetForeignPaths</code>一样，这个函数应该为提供的joinrel生成ForeignPath路径，并且调用add_path把这些路径加入到该连接应该考虑的路径集合中。但是和<code>GetForeignPaths</code>不一样的是，不需要这个函数产生最少一个路径，因为涉及本地连接的路径总是可用的。</p>
 <p>注意的是，对于相同的连接关系，将会重复调用此函数来生成内外关系的不同组合。FDW需要负责最小化其中重复的工作。</p>
@@ -278,12 +278,12 @@
 
 <div class="footer-wrapper container">
   <footer class="footer clearfix">
-    <a href="http://byte-cloris.com" class="footer-logo">
+    <a href="https://oyo-byte.github.io" class="footer-logo">
       <i class="fa fa-github"></i>
     </a>
     <ul class="footer-social-link">
       <li>© 2018 oYo-Byte</li>
-      <li><a href="http://byte-cloris.com">Home</a></li>
+      <li><a href="https://oyo-byte.github.io">Home</a></li>
       
       <li><a href="https://github.com/oYo-Byte">Github</a></li>
       
