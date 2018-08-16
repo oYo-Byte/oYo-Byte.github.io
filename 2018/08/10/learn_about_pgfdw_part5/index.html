@@ -8,12 +8,12 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>
-    学习PostgreSQL的查询机制 | oYo-Byte
+    学习PostgreSQL的FDW(#5)-辅助函数介绍 | oYo-Byte
   </title>
   <meta name="description" content="oYo-Byte&#39;s blog">
   
   <meta name="keywords" content="
-  PostgreSQL
+  PostgreSQL,FDW
   ">
   
   <meta name="author" content="oYo-Byte">
@@ -127,26 +127,61 @@
     <i class="fa fa-user-o"></i>
     oYo-Byte
 
-    <span class="post-date float-right" title="{{moment(1533291045600).format('MMM DD, YYYY, h:mm:ss A')}}">
+    <span class="post-date float-right" title="{{moment(1533882560579).format('MMM DD, YYYY, h:mm:ss A')}}">
       <i class="fa fa-pencil-square-o"></i>
-      {{moment(1533291045600).fromNow()}}
+      {{moment(1533882560579).fromNow()}}
     </span>
   </h3>
 
   <article class="post-content">
-    <h1>学习PostgreSQL的查询机制</h1>
-    <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>在PostgreSQL中，查询语句经过以下5个子系统处理：</p>
-<ol>
-<li><p>Parser<br>用于将文本式的SQL命令转换成解析树</p>
-</li>
-<li><p>Analyzer/Analyser<br>用于执行解析树的语义分析并生成查询树</p>
-</li>
-<li>Rewriter<br>重写器用于根据规则系统中已存在的规则转换查询树</li>
-<li>Planner<br>规划器生成可以从查询树中最有效地执行的计划树</li>
-<li>Executor<br>执行器通过按计划树创建的顺序访问表和索引来执行查询</li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180806173200.png" alt=""></p>
-<h3 id="Parser"><a href="#Parser" class="headerlink" title="Parser"></a>Parser</h3><p>解析器把</p>
+    <h1>学习PostgreSQL的FDW(#5)-辅助函数介绍</h1>
+    <p>PG核心服务器提供了多个辅助函数，是外部包装器的开发者们能很容易地访问到FDW相关对象的属性，例如FDW选项。使用这些函数，只需在源文件中引入foreign/foreign.h头文件即可。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">函数</th>
+<th style="text-align:left">代码</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">GetForeignDataWrapper</td>
+<td style="text-align:left">ForeignDataWrapper * GetForeignDataWrapper(Oid fdwid);</td>
+<td style="text-align:left">为具有给定 OID 的外部数据包装器返回一个ForeignDataWrapper对象。一个ForeignDataWrapper对象包含该FDW的特性</td>
+</tr>
+<tr>
+<td style="text-align:left">GetForeignServer</td>
+<td style="text-align:left">ForeignServer * GetForeignServer(Oid serverid);</td>
+<td style="text-align:left">为一个具有给定 OID 的外部服务器返回ForeignServer对象。一个ForeignServer对象包含该服务器的特性</td>
+</tr>
+<tr>
+<td style="text-align:left">GetUserMapping</td>
+<td style="text-align:left">UserMapping * GetUserMapping(Oid userid, Oid serverid);</td>
+<td style="text-align:left">为在给定服务器上的给定角色的用户映射返回UserMapping对象（如果指定用户没有映射，它将返回PUBLIC的映射，如果也没有则抛出错误）。一个UserMapping对象包含该用户映射的特性</td>
+</tr>
+<tr>
+<td style="text-align:left">GetForeignTable</td>
+<td style="text-align:left">ForeignTable * GetForeignTable(Oid relid);</td>
+<td style="text-align:left">为一个具有给定 OID 的外部表返回ForeignTable对象。一个ForeignTable对象包含该外部表的特性</td>
+</tr>
+<tr>
+<td style="text-align:left">GetForeignColumnOptions</td>
+<td style="text-align:left">List * GetForeignColumnOptions(Oid relid, AttrNumber attnum);</td>
+<td style="text-align:left">为一个具有给定外部表 OID 和属性号的列返回针对每一列的FDW选项，形式为一个DefElem列表。如果该列没有选项则返回 NIL。</td>
+</tr>
+<tr>
+<td style="text-align:left">GetForeignDataWrapperByName</td>
+<td style="text-align:left">ForeignDataWrapper <em> GetForeignDataWrapperByName(const char </em>name, bool missing_ok);</td>
+<td style="text-align:left">为一个具有给定名称的外部数据包装器返回ForeignDataWrapper对象。如果包装器没有找到，在missing_ok为真时返回 NULL，否则抛出一个错误。</td>
+</tr>
+<tr>
+<td style="text-align:left">GetForeignServerByName</td>
+<td style="text-align:left">ForeignServer <em> GetForeignServerByName(const char </em>name, bool missing_ok);</td>
+<td style="text-align:left">为一个具有给定名称的外部服务器返回ForeignServer对象。如果该服务器没有被找到，在missing_ok为真时返回 NULL，否则抛出一个错误。</td>
+</tr>
+</tbody>
+</table>
 
   </article>
 </div>

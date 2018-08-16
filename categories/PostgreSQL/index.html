@@ -146,18 +146,79 @@
     <li class="">
       <a href="/">Overview</a></li>
     <li class="">
-      <a href="/archives">Posts <span class="counter">7</span></a>
+      <a href="/archives">Posts <span class="counter">9</span></a>
     </li>
     <li class="selected">
       <a href="/categories">Categories <span
                 class="counter">2</span></a></li>
     <li class="">
-      <a href="/tags">Tags <span class="counter">4</span></a></li>
+      <a href="/tags">Tags <span class="counter">5</span></a></li>
   </ul>
 </nav>
 
     <div class="body-secondary">
       <ul class="archive-list">
+        
+        <li class="archive-list-item">
+          <h2><a href="/2018/08/10/learn_about_pgfdw_part6/">学习PostgreSQL的FDW(#6)-file_fdw源码分析</a></h2>
+          <p>
+             之前文章介绍了实现FDW的函数，现在来看看PostgreSQL实现的文件的FDW是怎么的吧。 PostgreSQL实现的file_fdw的源码可以在PostgreSQL的源码目录下contrib目录下找到。 
+   简介  file_fdw支持的数据文件必须是 COPY FROM 可读格式（tex...
+          </p>
+          <ul class="tag-list clearfix">
+            
+            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/file-fdw/">file_fdw</a></li>
+            
+          </ul>
+          <div class="post-info">
+            <span>
+              
+              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
+              
+            </span>
+            <span><i class="fa fa-tag"></i> 3 </span>
+            <span>Published {{moment(1533882703897).fromNow()}}</span>
+          </div>
+        </li>
+        
+        <li class="archive-list-item">
+          <h2><a href="/2018/08/10/learn_about_pgfdw_part5/">学习PostgreSQL的FDW(#5)-辅助函数介绍</a></h2>
+          <p>
+             PG核心服务器提供了多个辅助函数，是外部包装器的开发者们能很容易地访问到FDW相关对象的属性，例如FDW选项。使用这些函数，只需在源文件中引入foreign/foreign.h头文件即可。 
+ 
+ 
+ 
+ 函数 
+ 代码 
+ 说明 
+ 
+ 
+ 
+ 
+ GetForeignDataWrapper 
+...
+          </p>
+          <ul class="tag-list clearfix">
+            
+            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
+            
+          </ul>
+          <div class="post-info">
+            <span>
+              
+              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
+              
+            </span>
+            <span><i class="fa fa-tag"></i> 2 </span>
+            <span>Published {{moment(1533882560579).fromNow()}}</span>
+          </div>
+        </li>
         
         <li class="archive-list-item">
           <h2><a href="/2018/08/08/learn_about_pgfdw_part4/">学习PostgreSQL的FDW(#4)-其他函数说明 II</a></h2>
