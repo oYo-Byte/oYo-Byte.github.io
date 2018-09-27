@@ -44,32 +44,6 @@
   </entry>
   
   <entry>
-    <title>编写Grafana的datasource插件</title>
-    <link href="https://oyo-byte.github.io/2018/08/29/write_grafana_datasoure_plugins/"/>
-    <id>https://oyo-byte.github.io/2018/08/29/write_grafana_datasoure_plugins/</id>
-    <published>2018-08-29T02:59:01.013Z</published>
-    <updated>2018-08-29T10:39:42.304Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="Datasources"><a href="#Datasources" class="headerlink" title="Datasources"></a>Datasources</h2><p>数据源插件使人们可以通过http通信的来进行数据库插件开发</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h2 id=&quot;Datasources&quot;&gt;&lt;a href=&quot;#Datasources&quot; class=&quot;headerlink&quot; title=&quot;Datasources&quot;&gt;&lt;/a&gt;Datasources&lt;/h2&gt;&lt;p&gt;数据源插件使人们可以通过http通信的来进行数据库插件开发&lt;/p&gt;
-
-      
-    
-    </summary>
-    
-      <category term="Grafana" scheme="https://oyo-byte.github.io/categories/Grafana/"/>
-    
-    
-      <category term="Grafana" scheme="https://oyo-byte.github.io/tags/Grafana/"/>
-    
-  </entry>
-  
-  <entry>
     <title>学习PostgreSQL的FDW(#6)-file_fdw源码分析</title>
     <link href="https://oyo-byte.github.io/2018/08/10/learn_about_pgfdw_part6/"/>
     <id>https://oyo-byte.github.io/2018/08/10/learn_about_pgfdw_part6/</id>
