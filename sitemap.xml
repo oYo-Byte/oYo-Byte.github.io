@@ -2,16 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://oyo-byte.github.io/2018/08/10/learn_about_pgfdw_part5/</loc>
+    <loc>https://oyo-byte.github.io/2018/09/27/use_jmeter_connect_postgresql/</loc>
     
-    <lastmod>2018-08-16T17:24:58.054Z</lastmod>
+    <lastmod>2018-09-27T09:13:04.265Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://oyo-byte.github.io/2018/08/29/write_grafana_datasoure_plugins/</loc>
+    
+    <lastmod>2018-08-29T10:39:42.304Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://oyo-byte.github.io/2018/08/10/learn_about_pgfdw_part6/</loc>
     
-    <lastmod>2018-08-16T17:06:23.448Z</lastmod>
+    <lastmod>2018-08-17T08:27:08.522Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://oyo-byte.github.io/2018/08/03/learn_about_pg_query_processing/</loc>
+    
+    <lastmod>2018-08-17T08:26:32.716Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://oyo-byte.github.io/2018/08/10/learn_about_pgfdw_part5/</loc>
+    
+    <lastmod>2018-08-16T17:24:58.054Z</lastmod>
     
   </url>
   
@@ -26,13 +47,6 @@
     <loc>https://oyo-byte.github.io/2018/08/08/learn_about_pgfdw_part4/</loc>
     
     <lastmod>2018-08-08T10:00:12.436Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://oyo-byte.github.io/2018/08/03/learn_about_pg_query_processing/</loc>
-    
-    <lastmod>2018-08-07T17:24:35.167Z</lastmod>
     
   </url>
   

@@ -8,12 +8,12 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>
-    学习PostgreSQL的查询机制 | oYo-Byte
+    使用Jmeter的JDBC连接PostgreSQL进行压力测试 | oYo-Byte
   </title>
   <meta name="description" content="oYo-Byte&#39;s blog">
   
   <meta name="keywords" content="
-  PostgreSQL
+  PostgreSQL,Jmeter
   ">
   
   <meta name="author" content="oYo-Byte">
@@ -127,26 +127,24 @@
     <i class="fa fa-user-o"></i>
     oYo-Byte
 
-    <span class="post-date float-right" title="{{moment(1533291045600).format('MMM DD, YYYY, h:mm:ss A')}}">
+    <span class="post-date float-right" title="{{moment(1538035614529).format('MMM DD, YYYY, h:mm:ss A')}}">
       <i class="fa fa-pencil-square-o"></i>
-      {{moment(1533291045600).fromNow()}}
+      {{moment(1538035614529).fromNow()}}
     </span>
   </h3>
 
   <article class="post-content">
-    <h1>学习PostgreSQL的查询机制</h1>
-    <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>在PostgreSQL中，查询语句经过以下5个子系统处理：</p>
-<ol>
-<li><p>Parser<br>用于将文本式的SQL命令转换成解析树</p>
-</li>
-<li><p>Analyzer/Analyser<br>用于执行解析树的语义分析并生成查询树</p>
-</li>
-<li>Rewriter<br>重写器用于根据规则系统中已存在的规则转换查询树</li>
-<li>Planner<br>规划器生成可以从查询树中最有效地执行的计划树</li>
-<li>Executor<br>执行器通过按计划树创建的顺序访问表和索引来执行查询</li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180806173200.png" alt=""></p>
-<h3 id="Parser"><a href="#Parser" class="headerlink" title="Parser"></a>Parser</h3><p><br><br><em>未完待续</em></p>
+    <h1>使用Jmeter的JDBC连接PostgreSQL进行压力测试</h1>
+    <h3 id="添加驱动"><a href="#添加驱动" class="headerlink" title="添加驱动"></a>添加驱动</h3><p>使用Jmeter的JDBC功能时，需要添加对应的数据库驱动，将下载好的jar包放到Jmeter安装目录下的lib目录中，然后重启Jmeter使其生效。<br>PostgreSQL的JDBC驱动下载地址：<a href="https://jdbc.postgresql.org/download.html" target="_blank" rel="noopener">PostgreSQL驱动</a></p>
+<h3 id="在测试计划中添加线程组"><a href="#在测试计划中添加线程组" class="headerlink" title="在测试计划中添加线程组"></a>在测试计划中添加线程组</h3><p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180927162544.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180927162607.png" alt=""></p>
+<p>可以设置线程数以及循环次数</p>
+<h3 id="在线程组中添加数据库连接配置"><a href="#在线程组中添加数据库连接配置" class="headerlink" title="在线程组中添加数据库连接配置"></a>在线程组中添加数据库连接配置</h3><p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180927162825.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180927163605.png" alt=""></p>
+<h3 id="添加JDBC请求"><a href="#添加JDBC请求" class="headerlink" title="添加JDBC请求"></a>添加JDBC请求</h3><p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180927164543.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180927164839.png" alt=""></p>
+<h3 id="添加监听器"><a href="#添加监听器" class="headerlink" title="添加监听器"></a>添加监听器</h3><p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180927164946.png" alt=""></p>
+<h3 id="执行线程"><a href="#执行线程" class="headerlink" title="执行线程"></a>执行线程</h3><p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180927171236.png" alt=""></p>
 
   </article>
 </div>

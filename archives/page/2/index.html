@@ -145,13 +145,13 @@
   <ul class="clearfix">
     <li class="">
       <a href="/">Overview</a></li>
-    <li class="">
+    <li class="selected">
       <a href="/archives">Posts <span class="counter">11</span></a>
     </li>
     <li class="">
       <a href="/categories">Categories <span
                 class="counter">3</span></a></li>
-    <li class="selected">
+    <li class="">
       <a href="/tags">Tags <span class="counter">7</span></a></li>
   </ul>
 </nav>
@@ -160,10 +160,16 @@
       <ul class="archive-list">
         
         <li class="archive-list-item">
-          <h2><a href="/2018/08/07/learn_about_pgfdw_part2/">学习PostgreSQL的FDW(#2)-源码跟踪</a></h2>
+          <h2><a href="/2018/07/25/PostgreSQL使用oracle_fdw与Oracle查询性能对比/">PostgreSQL使用oracle_fdw与Oracle查询性能对比</a></h2>
           <p>
-             上篇大概介绍了FDW必须实现的7个回调函数 学习PostgreSQL的FDW(#1) ，本篇将从源码跟踪，这7个回调函数的调用时机，以PostgreSQL11beta2的postgres_fdw为例，分析PostgreSQL在查询外部表时，究竟做了什么。 
-   测试前准备  IP为192.168...
+               在PostgreSQL中使用oracle_fdw    安装oracle_fdw插件  
+ 安装前要求： 
+ 
+ 
+ 全部功能要求PostgreSQL9.3及以上 
+ Oracle client要求10.1以上 
+ 确保PostgreSQL配置了 --without-ldap  
+ 确保 pg...
           </p>
           <ul class="tag-list clearfix">
             
@@ -171,7 +177,7 @@
             
             <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
             
-            <li class="tag-list-item"><a href="/tags/gdb/">gdb</a></li>
+            <li class="tag-list-item"><a href="/tags/oracle/">oracle</a></li>
             
           </ul>
           <div class="post-info">
@@ -181,7 +187,7 @@
               
             </span>
             <span><i class="fa fa-tag"></i> 3 </span>
-            <span>Published {{moment(1533608145504).fromNow()}}</span>
+            <span>Published {{moment(1532489392892).fromNow()}}</span>
           </div>
         </li>
         
