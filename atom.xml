@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://oyo-byte.github.io/"/>
-  <updated>2018-09-27T09:13:04.265Z</updated>
+  <updated>2018-09-29T08:17:35.835Z</updated>
   <id>https://oyo-byte.github.io/</id>
   
   <author>
@@ -15,6 +15,47 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用sysbench测试infocycle_fdw查询性能</title>
+    <link href="https://oyo-byte.github.io/2018/09/29/sysbench_benchmark_infocycle_fdw/"/>
+    <id>https://oyo-byte.github.io/2018/09/29/sysbench_benchmark_infocycle_fdw/</id>
+    <published>2018-09-29T06:49:09.062Z</published>
+    <updated>2018-09-29T08:17:35.835Z</updated>
+    
+    <content type="html"><![CDATA[<p>测试机器： 原有的InfoCycle虚拟机  </p><table><thead><tr><th>信息</th><th></th></tr></thead><tbody><tr><td>操作系统</td><td>CentOS6.9</td></tr><tr><td>内存</td><td>8G</td></tr><tr><td>CPU</td><td>2核4线程</td></tr><tr><td>硬盘</td><td>机械硬盘</td></tr><tr><td>PosgtreSQL版本</td><td>11beta3</td></tr><tr><td>测试数据量</td><td>576000行</td></tr></tbody></table><p>sysbench使用的测试脚本：<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env sysbench</span></span><br><span class="line"></span><br><span class="line">require(<span class="string">"oltp_common"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> prepare_statements()</span><br><span class="line">   -- We <span class="keyword">do</span> not use prepared statements here, but oltp_common.sh expects this</span><br><span class="line">   -- <span class="keyword">function</span> to be defined</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> event(thread_id)</span><br><span class="line">          <span class="built_in">local</span> begin_query = <span class="string">"BEGIN"</span></span><br><span class="line">          <span class="built_in">local</span> commit_query = <span class="string">"COMMIT"</span></span><br><span class="line">          math.randomseed(os.time())</span><br><span class="line">          <span class="built_in">local</span> begin_pos = math.random(1,9)</span><br><span class="line">          <span class="built_in">local</span> end_pos = math.random(begin_pos,10)</span><br><span class="line">          db_query(begin_query)</span><br><span class="line">          con:query(string.format(<span class="string">"SELECT * FROM ecs2 WHERE station='%s' limit 100"</span>,begin_pos))</span><br><span class="line">          con:query(string.format(<span class="string">"SELECT * FROM ecs2 WHERE station BETWEEN '%s' AND '%s' limit 100"</span>,begin_pos, end_pos))</span><br><span class="line">          con:query(string.format(<span class="string">"SELECT * FROM ecs2 WHERE station BETWEEN '%s' AND '%s' ORDER BY archivetime desc limit 100"</span>,begin_pos, end_pos))</span><br><span class="line">          db_query(commit_query)</span><br><span class="line"></span><br><span class="line">end</span><br></pre></td></tr></table></figure></p><p>本次测试1-8个线程，每个线程重复测试3次。每次压测时间为120秒。</p><p>样本数据：</p><p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180929161420.png" alt=""></p><p>使用的测试脚本：<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">for</span> i <span class="keyword">in</span> 1 2 3 4 5 6 7 8;</span><br><span class="line"> <span class="keyword">do</span></span><br><span class="line"><span class="keyword">for</span> j <span class="keyword">in</span> 1 2 3;</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"doing <span class="variable">$i</span> the <span class="variable">$j</span> times"</span></span><br><span class="line">/appdb/sysbench/bin/sysbench --db-driver=pgsql --pgsql-host=192.168.10.82 --pgsql-port=5432 --pgsql-user=atlasdb --pgsql-password=123456 --pgsql-db=infocycle --time=120 --report-interval=5 --threads=<span class="variable">$i</span> /appdb/sysbench/share/sysbench/pgotlp.lua  run &gt;&gt; /data/sysbench.log ;</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"sleeping"</span>;</span><br><span class="line">sleep 10;</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"> </span><br><span class="line"> <span class="keyword">done</span></span><br></pre></td></tr></table></figure></p><p>将sysbench输出结果输出到csv：<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat sysbench.log | egrep <span class="string">" cat|threads:|transactions|queries:|read:|write:|other:|total:|min:|avg:|max:|percentile:"</span> | tr -d <span class="string">"\n"</span> | sed <span class="string">'s/Number of threads: /\n/g'</span> | sed <span class="string">'s/\[/\n/g'</span> |sed <span class="string">'s/[A-Za-z\/]\&#123;1,\&#125;://g'</span>| sed <span class="string">'s/ \.//g'</span> | sed -e <span class="string">'s/read\/write//g'</span> -e <span class="string">'s/approx\. 95//g'</span> -e <span class="string">'s/per sec.)//g'</span> -e <span class="string">'s/ms//g'</span> -e <span class="string">'s/(//g'</span> -e <span class="string">'s/^.*cat //g'</span> |sed <span class="string">'s/ \&#123;1,\&#125;/,/g'</span></span><br></pre></td></tr></table></figure></p><p>测试结果：</p><p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180929153737.png" alt=""></p><p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180929161130.png" alt=""></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;测试机器： 原有的InfoCycle虚拟机  &lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;信息&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;操作系统&lt;/td&gt;
+&lt;td&gt;CentOS6.9&lt;/td&gt;
+&lt;/tr&gt;
+      
+    
+    </summary>
+    
+      <category term="PostgreSQL" scheme="https://oyo-byte.github.io/categories/PostgreSQL/"/>
+    
+    
+      <category term="PostgreSQL" scheme="https://oyo-byte.github.io/tags/PostgreSQL/"/>
+    
+      <category term="FDW" scheme="https://oyo-byte.github.io/tags/FDW/"/>
+    
+      <category term="sysbench" scheme="https://oyo-byte.github.io/tags/sysbench/"/>
+    
+  </entry>
   
   <entry>
     <title>使用Jmeter的JDBC连接PostgreSQL进行压力测试</title>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>
+    使用sysbench测试infocycle_fdw查询性能 | oYo-Byte
+  </title>
+  <meta name="description" content="oYo-Byte&#39;s blog">
+  
+  <meta name="keywords" content="
+  PostgreSQL,FDW,sysbench
+  ">
+  
+  <meta name="author" content="oYo-Byte">
+
+  <meta http-equiv="Cache-Control" content="no-transform"/>
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+  <link rel="icon" type="image/x-icon" href="https://assets-cdn.github.com/favicon.ico">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+
+  
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/1.0.25-csp/vue.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
+</head>
+
+<body id="replica-app">
+
+<nav class="navbar-wrapper">
+  <div class="navbar">
+    <div class="container clearfix">
+      <a href="/" class="navbar-logo"><i class="fa fa-github"></i></a>
+
+      <div class="navbar-search float-left desktop-only">
+        <div class="navbar-search-form">
+          <label for="gsc-i-id1">This website</label>
+          <div id="google-search">
+            <gcse:search></gcse:search>
+          </div>
+        </div>
+      </div>
+
+      <ul class="navbar-nav float-left">
+        
+        <li><a href="/archives">Archives</a></li>
+        
+        
+        <li><a href="/categories">Categories</a></li>
+        
+        
+        <li><a href="/tags">Tags</a></li>
+        
+        
+        <li class="desktop-only"><a href="/atom.xml" target="_blank">RSS</a></li>
+        
+      </ul>
+
+      <ul class="navbar-nav user-nav float-right desktop-only">
+        <li class="user-nav-notification">
+          <a><span class="user-nav-unread"></span><i class="fa fa-bell"></i></a>
+        </li>
+        <li>
+          <a><i class="fa fa-plus"></i> <i class="fa fa-caret-down"></i></a>
+        </li>
+        <li class="user-nav-logo">
+          <a><img src="https://avatars2.githubusercontent.com/u/8343269?s=460&amp;v=4"> <i class="fa fa-caret-down"></i></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="main-container">
+  <header class="header-wrapper desktop-only">
+  <div class="container header-site-detail">
+    <ul class="header-toolbar">
+      <li class="clearfix">
+        <a href="/archives" class="header-toolbar-left"><i
+                  class="fa fa-file-text"></i> Posts </a>
+        <a href="/archives"
+           class="header-toolbar-right"> 11 </a>
+      </li>
+      <li>
+        <a href="/tags" class="header-toolbar-left"><i
+                  class="fa fa-tags"></i> Tags </a>
+        <a href="/tags"
+           class="header-toolbar-right"> 7 </a>
+      </li>
+      <li>
+        <a href="/categories" class="header-toolbar-left"><i
+                  class="fa fa-folder-open"></i> Categories </a>
+        <a href="/categories"
+           class="header-toolbar-right"> 2 </a>
+      </li>
+    </ul>
+    <h2 class="header-title">
+      <i class="fa fa-book text-muted"></i>
+      <a href="/">oYo-Byte</a>
+      
+      
+    </h2>
+  </div>
+
+  <div class="container">
+    <div class="header-tab-wrapper clearfix">
+      <span class="header-tab header-tab-selected"><i class="fa fa-thumbs-o-up"></i> Like</span>
+      <span class="header-tab"><i class="fa fa-share-alt"></i> Share</span>
+      <span class="header-tab"><i class="fa fa-comments-o"></i> Discussion</span>
+      <span class="header-tab"><i class="fa fa-bookmark-o"></i> Bookmark </span>
+      <span class="header-tab"><i class="fa fa-smile-o"></i> Smile <i class="fa fa-caret-down"></i></span>
+    </div>
+  </div>
+</header>
+
+
+<div class="post-container container">
+  <h3>
+    <i class="fa fa-user-o"></i>
+    oYo-Byte
+
+    <span class="post-date float-right" title="{{moment(1538203749062).format('MMM DD, YYYY, h:mm:ss A')}}">
+      <i class="fa fa-pencil-square-o"></i>
+      {{moment(1538203749062).fromNow()}}
+    </span>
+  </h3>
+
+  <article class="post-content">
+    <h1>使用sysbench测试infocycle_fdw查询性能</h1>
+    <p>测试机器： 原有的InfoCycle虚拟机  </p>
+<table>
+<thead>
+<tr>
+<th>信息</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>操作系统</td>
+<td>CentOS6.9</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>8G</td>
+</tr>
+<tr>
+<td>CPU</td>
+<td>2核4线程</td>
+</tr>
+<tr>
+<td>硬盘</td>
+<td>机械硬盘</td>
+</tr>
+<tr>
+<td>PosgtreSQL版本</td>
+<td>11beta3</td>
+</tr>
+<tr>
+<td>测试数据量</td>
+<td>576000行</td>
+</tr>
+</tbody>
+</table>
+<p>sysbench使用的测试脚本：<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env sysbench</span></span><br><span class="line"></span><br><span class="line">require(<span class="string">"oltp_common"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> prepare_statements()</span><br><span class="line">   -- We <span class="keyword">do</span> not use prepared statements here, but oltp_common.sh expects this</span><br><span class="line">   -- <span class="keyword">function</span> to be defined</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> event(thread_id)</span><br><span class="line">          <span class="built_in">local</span> begin_query = <span class="string">"BEGIN"</span></span><br><span class="line">          <span class="built_in">local</span> commit_query = <span class="string">"COMMIT"</span></span><br><span class="line">          math.randomseed(os.time())</span><br><span class="line">          <span class="built_in">local</span> begin_pos = math.random(1,9)</span><br><span class="line">          <span class="built_in">local</span> end_pos = math.random(begin_pos,10)</span><br><span class="line">          db_query(begin_query)</span><br><span class="line">          con:query(string.format(<span class="string">"SELECT * FROM ecs2 WHERE station='%s' limit 100"</span>,begin_pos))</span><br><span class="line">          con:query(string.format(<span class="string">"SELECT * FROM ecs2 WHERE station BETWEEN '%s' AND '%s' limit 100"</span>,begin_pos, end_pos))</span><br><span class="line">          con:query(string.format(<span class="string">"SELECT * FROM ecs2 WHERE station BETWEEN '%s' AND '%s' ORDER BY archivetime desc limit 100"</span>,begin_pos, end_pos))</span><br><span class="line">          db_query(commit_query)</span><br><span class="line"></span><br><span class="line">end</span><br></pre></td></tr></table></figure></p>
+<p>本次测试1-8个线程，每个线程重复测试3次。每次压测时间为120秒。</p>
+<p>样本数据：</p>
+<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180929161420.png" alt=""></p>
+<p>使用的测试脚本：<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">for</span> i <span class="keyword">in</span> 1 2 3 4 5 6 7 8;</span><br><span class="line"> <span class="keyword">do</span></span><br><span class="line">	<span class="keyword">for</span> j <span class="keyword">in</span> 1 2 3;</span><br><span class="line">	<span class="keyword">do</span></span><br><span class="line">		<span class="built_in">echo</span> <span class="string">"doing <span class="variable">$i</span> the <span class="variable">$j</span> times"</span></span><br><span class="line">		/appdb/sysbench/bin/sysbench --db-driver=pgsql --pgsql-host=192.168.10.82 --pgsql-port=5432 --pgsql-user=atlasdb --pgsql-password=123456 --pgsql-db=infocycle --time=120 --report-interval=5 --threads=<span class="variable">$i</span> /appdb/sysbench/share/sysbench/pgotlp.lua  run &gt;&gt; /data/sysbench.log ;</span><br><span class="line">		</span><br><span class="line">		<span class="built_in">echo</span> <span class="string">"sleeping"</span>;</span><br><span class="line">		sleep 10;</span><br><span class="line">	<span class="keyword">done</span></span><br><span class="line"> </span><br><span class="line"> <span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
+<p>将sysbench输出结果输出到csv：<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat sysbench.log | egrep <span class="string">" cat|threads:|transactions|queries:|read:|write:|other:|total:|min:|avg:|max:|percentile:"</span> | tr -d <span class="string">"\n"</span> | sed <span class="string">'s/Number of threads: /\n/g'</span> | sed <span class="string">'s/\[/\n/g'</span> |sed <span class="string">'s/[A-Za-z\/]\&#123;1,\&#125;://g'</span>| sed <span class="string">'s/ \.//g'</span> | sed -e <span class="string">'s/read\/write//g'</span> -e <span class="string">'s/approx\. 95//g'</span> -e <span class="string">'s/per sec.)//g'</span> -e <span class="string">'s/ms//g'</span> -e <span class="string">'s/(//g'</span> -e <span class="string">'s/^.*cat //g'</span> |sed <span class="string">'s/ \&#123;1,\&#125;/,/g'</span></span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180929153737.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180929161130.png" alt=""></p>
+
+  </article>
+</div>
+
+
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<script src="/js/md5.min.js"></script>
+<div class='container' id="gitalk-container"></div>
+<script>
+    var gitalk = new Gitalk({
+        clientID: '0f95488e2c5e12bc2a2a',
+        clientSecret: 'b01836c08c02e727359d1c8df682e8b65fe41de1',
+        repo: 'blog_gitalk',
+        owner: 'oYo-Byte',
+        admin: ['oYo-Byte'],
+		id: md5(location.pathname),
+        distractionFreeMode: true,
+    })
+    gitalk.render('gitalk-container')
+</script>
+
+
+
+
+</div>
+
+<div class="footer-wrapper container">
+  <footer class="footer clearfix">
+    <a href="https://oyo-byte.github.io" class="footer-logo">
+      <i class="fa fa-github"></i>
+    </a>
+    <ul class="footer-social-link">
+      <li>© 2018 oYo-Byte</li>
+      <li><a href="https://oyo-byte.github.io">Home</a></li>
+      
+      <li><a href="https://github.com/oYo-Byte">Github</a></li>
+      
+    </ul>
+    <div class="footer-theme-info">
+      Theme <a href="//github.com/sabrinaluo/hexo-theme-replica">Replica</a>
+      by <a href="//github.com/sabrinaluo">Hiitea</a> ❤ Powered by Hexo
+    </div>
+  </footer>
+</div>
+
+
+
+
+<script src="/js/main.js"></script>
+
+</body>
+</html>

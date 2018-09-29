@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://oyo-byte.github.io/2018/09/29/sysbench_benchmark_infocycle_fdw/</loc>
+    
+    <lastmod>2018-09-29T08:17:35.835Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://oyo-byte.github.io/2018/09/27/use_jmeter_connect_postgresql/</loc>
     
     <lastmod>2018-09-27T09:13:04.265Z</lastmod>
