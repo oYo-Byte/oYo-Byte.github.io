@@ -145,13 +145,13 @@
   <ul class="clearfix">
     <li class="">
       <a href="/">Overview</a></li>
-    <li class="">
+    <li class="selected">
       <a href="/archives">Posts <span class="counter">12</span></a>
     </li>
     <li class="">
       <a href="/categories">Categories <span
                 class="counter">2</span></a></li>
-    <li class="selected">
+    <li class="">
       <a href="/tags">Tags <span class="counter">7</span></a></li>
   </ul>
 </nav>
@@ -160,18 +160,15 @@
       <ul class="archive-list">
         
         <li class="archive-list-item">
-          <h2><a href="/2018/09/27/use_jmeter_connect_postgresql/">使用Jmeter的JDBC连接PostgreSQL进行压力测试</a></h2>
+          <h2><a href="/2018/10/07/how_to_write_a_pg_fdw/">如何编写一个PG的FDW</a></h2>
           <p>
-               添加驱动  使用Jmeter的JDBC功能时，需要添加对应的数据库驱动，将下载好的jar包放到Jmeter安装目录下的lib目录中，然后重启Jmeter使其生效。 PostgreSQL的JDBC驱动下载地址： PostgreSQL驱动  
-   在测试计划中添加线程组    
-   
- 可以设...
+             之前写了那么多学习FDW的记录，最终还是需要通过写一个FDW来验证学习的成果。本次暂时实现的是查询的FDW。修改方面的还待后续继续深入。 根据之前的学习记录： 学习PostgreSQL的FDW(#1) ，我们知道即使要实现一个最简单的FDW，也要实现其中7个回调函数： GetForeignRelS...
           </p>
           <ul class="tag-list clearfix">
             
             <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
             
-            <li class="tag-list-item"><a href="/tags/Jmeter/">Jmeter</a></li>
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
             
           </ul>
           <div class="post-info">
@@ -181,7 +178,7 @@
               
             </span>
             <span><i class="fa fa-tag"></i> 2 </span>
-            <span>Published {{moment(1538035614529).fromNow()}}</span>
+            <span>Published {{moment(1538924626114).fromNow()}}</span>
           </div>
         </li>
         

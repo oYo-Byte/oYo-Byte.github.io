@@ -87,7 +87,7 @@
         <a href="/archives" class="header-toolbar-left"><i
                   class="fa fa-file-text"></i> Posts </a>
         <a href="/archives"
-           class="header-toolbar-right"> 11 </a>
+           class="header-toolbar-right"> 12 </a>
       </li>
       <li>
         <a href="/tags" class="header-toolbar-left"><i
@@ -161,6 +161,10 @@
 <td>机械硬盘</td>
 </tr>
 <tr>
+<td>网络</td>
+<td>千兆</td>
+</tr>
+<tr>
 <td>PosgtreSQL版本</td>
 <td>11beta3</td>
 </tr>
@@ -180,7 +184,7 @@
 <p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180929153737.png" alt=""></p>
 <p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180929161130.png" alt=""></p>
 <h3 id="以上结果不可信"><a href="#以上结果不可信" class="headerlink" title="以上结果不可信"></a>以上结果不可信</h3><p>发现以上结果的QPS有点高，不太可信，所以重新验证一下，发现上面的测试场景中，后面2条的SQL执行要不就是没有返回，要不就是执行出错，并且把事务的开关QPS都算进里面了，导致sysbench测试结果有误。</p>
-<p>于是重新整理测试场景，重新测试，这次测试是1-8个线程，每个线程重复测试5次。每次压测时间为120秒。</p>
+<h3 id="重测"><a href="#重测" class="headerlink" title="重测"></a>重测</h3><p>于是重新整理测试场景，重新测试，这次测试是1-8个线程，每个线程重复测试5次。每次压测时间为120秒。</p>
 <h4 id="场景1：查询某个station的某个type的某个时间的记录"><a href="#场景1：查询某个station的某个type的某个时间的记录" class="headerlink" title="场景1：查询某个station的某个type的某个时间的记录"></a>场景1：查询某个station的某个type的某个时间的记录</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env sysbench</span></span><br><span class="line">require(<span class="string">"oltp_common"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> prepare_statements()</span><br><span class="line">   -- We <span class="keyword">do</span> not use prepared statements here, but oltp_common.sh expects this</span><br><span class="line">   -- <span class="keyword">function</span> to be defined</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> event(thread_id)</span><br><span class="line">	  math.randomseed(os.time())</span><br><span class="line">	  <span class="built_in">local</span> station_random = math.random(1, 10)</span><br><span class="line">	  <span class="built_in">local</span> type_random = math.random(1, 4)</span><br><span class="line">	  <span class="built_in">local</span> time_random = 1533225600 + 180 * math.random(0, 4799) </span><br><span class="line">	  con:query(string.format(<span class="string">"SELECT * FROM ecs2 WHERE station='%s' AND type='%s' AND time='%s'"</span>,station_random, type_random, time_random))</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
 <p>测试时服务器的情况：</p>
 <p>1线程时：<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180930160822.png" alt=""></p>
@@ -195,7 +199,18 @@
 <p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20180930174008.png" alt=""></p>
 <h4 id="场景2：查询某个station的某个type的某一天所有的记录"><a href="#场景2：查询某个station的某个type的某一天所有的记录" class="headerlink" title="场景2：查询某个station的某个type的某一天所有的记录"></a>场景2：查询某个station的某个type的某一天所有的记录</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env sysbench</span></span><br><span class="line">require(<span class="string">"oltp_common"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> prepare_statements()</span><br><span class="line">   -- We <span class="keyword">do</span> not use prepared statements here, but oltp_common.sh expects this</span><br><span class="line">   -- <span class="keyword">function</span> to be defined</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> event(thread_id)</span><br><span class="line">	  math.randomseed(os.time())</span><br><span class="line">	  <span class="built_in">local</span> station_random = math.random(1,10)</span><br><span class="line">	  <span class="built_in">local</span> type_random = math.random(1,4)</span><br><span class="line">	  <span class="built_in">local</span> time_random = 1533225600 + 180 * math.random(0, 4798) </span><br><span class="line">	  <span class="built_in">local</span> time_end_random = time_random + 86400 -- 加一天的范围</span><br><span class="line">	  con:query(string.format(<span class="string">"SELECT * FROM ecs2 WHERE station='%s' AND type='%s' AND time BETWEEN '%s' AND '%s'"</span>,station_random, type_random, time_random, time_end_random))</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
 <p>测试时服务器的情况：</p>
-<p><em>未完待续</em></p>
+<p>1线程时：<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20181008153411.png" alt=""></p>
+<p>2线程时：<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20181008154856.png" alt=""></p>
+<p>3线程时：（忘截图了）</p>
+<p>4线程时：<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20181008160818.png" alt=""></p>
+<p>5线程时：<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20181008162557.png" alt=""></p>
+<p>6线程时：<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20181008163606.png" alt=""></p>
+<p>7线程时：<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20181008164724.png" alt=""></p>
+<p>8线程时：<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20181008170027.png" alt=""></p>
+<p>测试结果：<br><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20181008172242.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/oYo-Byte/img_libs/master/blog/20181008173144.png" alt=""></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>目前实现的FDW的随线程数增多，QPS也增大，在7和8个线程时，基本不再增长，此时基本达到网卡的上限100MB+/s。<br>注：由于测试环境中，同一个station同一个type的同一时间里是有3条数据返回的，但实际的环境应该是只有一条的，因此两个场景查询得到的数据量是实际的3倍，如果在实际环境上QPS应该还是有差异的（提升？）。</p>
+<h4 id="反思"><a href="#反思" class="headerlink" title="反思"></a>反思</h4><p>由于一开始对测试的需求不太理解，以自己的想法去弄，导致测试结果完全是错误的。还有就是对于不熟悉的工具，还是需要花一点时间去熟悉，不然只会走更多的弯路。</p>
 
   </article>
 </div>
