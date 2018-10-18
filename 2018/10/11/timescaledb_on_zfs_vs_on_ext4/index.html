@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>
+    TimescaleDB在ZFS和Ext4文件系统上的空间占用对比 | oYo-Byte
+  </title>
+  <meta name="description" content="oYo-Byte&#39;s blog">
+  
+  <meta name="keywords" content="
+  PostgreSQL,ZFS,TimescaleDB
+  ">
+  
+  <meta name="author" content="oYo-Byte">
+
+  <meta http-equiv="Cache-Control" content="no-transform"/>
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+  <link rel="icon" type="image/x-icon" href="https://assets-cdn.github.com/favicon.ico">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+
+  
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/1.0.25-csp/vue.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
+</head>
+
+<body id="replica-app">
+
+<nav class="navbar-wrapper">
+  <div class="navbar">
+    <div class="container clearfix">
+      <a href="/" class="navbar-logo"><i class="fa fa-github"></i></a>
+
+      <div class="navbar-search float-left desktop-only">
+        <div class="navbar-search-form">
+          <label for="gsc-i-id1">This website</label>
+          <div id="google-search">
+            <gcse:search></gcse:search>
+          </div>
+        </div>
+      </div>
+
+      <ul class="navbar-nav float-left">
+        
+        <li><a href="/archives">Archives</a></li>
+        
+        
+        <li><a href="/categories">Categories</a></li>
+        
+        
+        <li><a href="/tags">Tags</a></li>
+        
+        
+        <li class="desktop-only"><a href="/atom.xml" target="_blank">RSS</a></li>
+        
+      </ul>
+
+      <ul class="navbar-nav user-nav float-right desktop-only">
+        <li class="user-nav-notification">
+          <a><span class="user-nav-unread"></span><i class="fa fa-bell"></i></a>
+        </li>
+        <li>
+          <a><i class="fa fa-plus"></i> <i class="fa fa-caret-down"></i></a>
+        </li>
+        <li class="user-nav-logo">
+          <a><img src="https://avatars2.githubusercontent.com/u/8343269?s=460&amp;v=4"> <i class="fa fa-caret-down"></i></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="main-container">
+  <header class="header-wrapper desktop-only">
+  <div class="container header-site-detail">
+    <ul class="header-toolbar">
+      <li class="clearfix">
+        <a href="/archives" class="header-toolbar-left"><i
+                  class="fa fa-file-text"></i> Posts </a>
+        <a href="/archives"
+           class="header-toolbar-right"> 14 </a>
+      </li>
+      <li>
+        <a href="/tags" class="header-toolbar-left"><i
+                  class="fa fa-tags"></i> Tags </a>
+        <a href="/tags"
+           class="header-toolbar-right"> 10 </a>
+      </li>
+      <li>
+        <a href="/categories" class="header-toolbar-left"><i
+                  class="fa fa-folder-open"></i> Categories </a>
+        <a href="/categories"
+           class="header-toolbar-right"> 3 </a>
+      </li>
+    </ul>
+    <h2 class="header-title">
+      <i class="fa fa-book text-muted"></i>
+      <a href="/">oYo-Byte</a>
+      
+      
+    </h2>
+  </div>
+
+  <div class="container">
+    <div class="header-tab-wrapper clearfix">
+      <span class="header-tab header-tab-selected"><i class="fa fa-thumbs-o-up"></i> Like</span>
+      <span class="header-tab"><i class="fa fa-share-alt"></i> Share</span>
+      <span class="header-tab"><i class="fa fa-comments-o"></i> Discussion</span>
+      <span class="header-tab"><i class="fa fa-bookmark-o"></i> Bookmark </span>
+      <span class="header-tab"><i class="fa fa-smile-o"></i> Smile <i class="fa fa-caret-down"></i></span>
+    </div>
+  </div>
+</header>
+
+
+<div class="post-container container">
+  <h3>
+    <i class="fa fa-user-o"></i>
+    oYo-Byte
+
+    <span class="post-date float-right" title="{{moment(1539248498852).format('MMM DD, YYYY, h:mm:ss A')}}">
+      <i class="fa fa-pencil-square-o"></i>
+      {{moment(1539248498852).fromNow()}}
+    </span>
+  </h3>
+
+  <article class="post-content">
+    <h1>TimescaleDB在ZFS和Ext4文件系统上的空间占用对比</h1>
+    <table>
+<thead>
+<tr>
+<th>信息</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>操作系统</td>
+<td>CentOS7.4</td>
+</tr>
+<tr>
+<td>PosgtreSQL版本</td>
+<td>10.4</td>
+</tr>
+<tr>
+<td>TimescaleDB版本</td>
+<td>0.12.1</td>
+</tr>
+<tr>
+<td>ZFS压缩算法</td>
+<td>LZ4、GZIP</td>
+</tr>
+</tbody>
+</table>
+<h3 id="测试场景1：-一列timestamp字段-N列字符串字段"><a href="#测试场景1：-一列timestamp字段-N列字符串字段" class="headerlink" title="测试场景1： 一列timestamp字段 + N列字符串字段"></a>测试场景1： 一列timestamp字段 + N列字符串字段</h3><p>数据量500万行</p>
+<h4 id="1、10列字符串字段，所有行字符数据都一致，每列字符数据亦重复"><a href="#1、10列字符串字段，所有行字符数据都一致，每列字符数据亦重复" class="headerlink" title="1、10列字符串字段，所有行字符数据都一致，每列字符数据亦重复"></a>1、10列字符串字段，所有行字符数据都一致，每列字符数据亦重复</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allcharextreme(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, </span><br><span class="line">c1 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c2 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c3 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c4 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c5 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c6 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c7 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c8 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c9 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c10 <span class="built_in">varchar</span>(<span class="number">50</span>)</span><br><span class="line">) <span class="keyword">tablespace</span> ext4allcharextreme;</span><br></pre></td></tr></table></figure></p>
+<p>使用命令查看数据文件的大小：<code>du -h -m --max-depth=1</code>，注：每张表都是使用独立的表空间<br>在psql中使用命令查看表空间大小：<code>\db+ ext4allcharextreme</code></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>2044MB</td>
+<td>213MB</td>
+<td>181MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>2044MB</td>
+<td>2038MB</td>
+<td>2038MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>2044/213=9.6x</td>
+<td>2044/181=11.3x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>10.4%</td>
+<td>8.85%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2、10列字符串字段，所有行字符数据都是随机的"><a href="#2、10列字符串字段，所有行字符数据都是随机的" class="headerlink" title="2、10列字符串字段，所有行字符数据都是随机的"></a>2、10列字符串字段，所有行字符数据都是随机的</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allchar10(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, </span><br><span class="line">c1 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c2 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c3 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c4 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c5 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c6 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c7 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c8 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c9 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c10 <span class="built_in">varchar</span>(<span class="number">50</span>)</span><br><span class="line">) <span class="keyword">tablespace</span> ext4allchar10;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>2045MB</td>
+<td>1958MB</td>
+<td>1462MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>2045MB</td>
+<td>2038MB</td>
+<td>2038MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>2045/1958=1.044x</td>
+<td>2045/1462=1.4x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>95.7%</td>
+<td>71.5%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="3、20列字符串字段，所有行字符数据都是随机的"><a href="#3、20列字符串字段，所有行字符数据都是随机的" class="headerlink" title="3、20列字符串字段，所有行字符数据都是随机的"></a>3、20列字符串字段，所有行字符数据都是随机的</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allchar20(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, </span><br><span class="line">c1 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c2 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c3 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c4 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c5 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c6 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c7 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c8 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c9 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c10 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c11 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c12 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c13 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c14 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c15 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c16 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c17 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c18 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c19 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c20 <span class="built_in">varchar</span>(<span class="number">50</span>)</span><br><span class="line">) <span class="keyword">tablespace</span> ext4allchar20;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>4091MB</td>
+<td>4026MB</td>
+<td>3016MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>4090MB</td>
+<td>4087MB</td>
+<td>4087MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>4091/4026=1.016x</td>
+<td>4091/3016=1.36x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>98.4%</td>
+<td>73.7%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="4、30列字符串字段，所有行字符数据都是随机的"><a href="#4、30列字符串字段，所有行字符数据都是随机的" class="headerlink" title="4、30列字符串字段，所有行字符数据都是随机的"></a>4、30列字符串字段，所有行字符数据都是随机的</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allchar30(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, </span><br><span class="line">c1 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c2 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c3 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c4 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c5 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c6 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c7 <span class="built_in">varchar</span>(<span class="number">20</span>),</span><br><span class="line">c8 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c9 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c10 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c11 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c12 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c13 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c14 <span class="built_in">varchar</span>(<span class="number">30</span>),</span><br><span class="line">c15 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c16 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c17 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c18 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c19 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c20 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c21 <span class="built_in">varchar</span>(<span class="number">40</span>),</span><br><span class="line">c22 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c23 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c24 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c25 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c26 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c27 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c28 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c29 <span class="built_in">varchar</span>(<span class="number">50</span>),</span><br><span class="line">c30 <span class="built_in">varchar</span>(<span class="number">50</span>)</span><br><span class="line">) <span class="keyword">tablespace</span> ext4allchar30;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>5765MB</td>
+<td>5717MB</td>
+<td>4288MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>5765MB</td>
+<td>5763MB</td>
+<td>5763MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>5765/5717=1.008x</td>
+<td>5765/4288=1.34x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>99.17%</td>
+<td>74.38%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="测试场景2：-一列timestamp字段-N列整型字段"><a href="#测试场景2：-一列timestamp字段-N列整型字段" class="headerlink" title="测试场景2： 一列timestamp字段 + N列整型字段"></a>测试场景2： 一列timestamp字段 + N列整型字段</h3><p>数据量1000万行</p>
+<h4 id="1、10列整型字段，所有行整数数据都一致"><a href="#1、10列整型字段，所有行整数数据都一致" class="headerlink" title="1、10列整型字段，所有行整数数据都一致"></a>1、10列整型字段，所有行整数数据都一致</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allintextreme(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">int</span>,i2 <span class="built_in">int</span>,i3 <span class="built_in">int</span>,i4 <span class="built_in">int</span>,i5 <span class="built_in">int</span>,i6 <span class="built_in">bigint</span>,i7 <span class="built_in">bigint</span>,i8 <span class="built_in">bigint</span>,i9 <span class="built_in">bigint</span>,i10 <span class="built_in">bigint</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4allintextreme;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>1333MB</td>
+<td>340MB</td>
+<td>227MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>1332MB</td>
+<td>1257MB</td>
+<td>1257MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>1333/340=3.92x</td>
+<td>1333/227=5.87x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>25.5%</td>
+<td>17.0%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2、10列整型字段，所有行整数数据都是随机的"><a href="#2、10列整型字段，所有行整数数据都是随机的" class="headerlink" title="2、10列整型字段，所有行整数数据都是随机的"></a>2、10列整型字段，所有行整数数据都是随机的</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allint10(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">int</span>,i2 <span class="built_in">int</span>,i3 <span class="built_in">int</span>,i4 <span class="built_in">int</span>,i5 <span class="built_in">int</span>,i6 <span class="built_in">bigint</span>,i7 <span class="built_in">bigint</span>,i8 <span class="built_in">bigint</span>,i9 <span class="built_in">bigint</span>,i10 <span class="built_in">bigint</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4allint10;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>1332MB</td>
+<td>1003MB</td>
+<td>830MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>1332MB</td>
+<td>1257MB</td>
+<td>1257MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>1332/1003=1.33x</td>
+<td>1332/830=1.6x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>75.3%</td>
+<td>62.3%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="3、20列整型字段，所有行整数数据都是随机的"><a href="#3、20列整型字段，所有行整数数据都是随机的" class="headerlink" title="3、20列整型字段，所有行整数数据都是随机的"></a>3、20列整型字段，所有行整数数据都是随机的</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allint20(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">int</span>,i2 <span class="built_in">int</span>,i3 <span class="built_in">int</span>,i4 <span class="built_in">int</span>,i5 <span class="built_in">int</span>,i6 <span class="built_in">int</span>,i7 <span class="built_in">int</span>,i8 <span class="built_in">int</span>,i9 <span class="built_in">int</span>,i10 <span class="built_in">int</span>, i11 <span class="built_in">bigint</span>, i12 <span class="built_in">bigint</span>,i13 <span class="built_in">bigint</span>,i14 <span class="built_in">bigint</span>,i15 <span class="built_in">bigint</span>,i16 <span class="built_in">bigint</span>,i17 <span class="built_in">bigint</span>,i18 <span class="built_in">bigint</span>,i19 <span class="built_in">bigint</span>,i20 <span class="built_in">bigint</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4allint20;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>1871MB</td>
+<td>1671MB</td>
+<td>1426MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>1870MB</td>
+<td>1828MB</td>
+<td>1828MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>1871/1671=1.12x</td>
+<td>1871/1426=1.31x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>89.3%</td>
+<td>76.2%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="4、30列整型字段，所有行整数数据都是随机的"><a href="#4、30列整型字段，所有行整数数据都是随机的" class="headerlink" title="4、30列整型字段，所有行整数数据都是随机的"></a>4、30列整型字段，所有行整数数据都是随机的</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allint30(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">int</span>,i2 <span class="built_in">int</span>,i3 <span class="built_in">int</span>,i4 <span class="built_in">int</span>,i5 <span class="built_in">int</span>,i6 <span class="built_in">int</span>,i7 <span class="built_in">int</span>,i8 <span class="built_in">int</span>,i9 <span class="built_in">int</span>,i10 <span class="built_in">int</span>, i11 <span class="built_in">int</span>, i12 <span class="built_in">int</span>,i13 <span class="built_in">int</span>,i14 <span class="built_in">int</span>,i15 <span class="built_in">int</span>,i16 <span class="built_in">bigint</span>,i17 <span class="built_in">bigint</span>,i18 <span class="built_in">bigint</span>,i19 <span class="built_in">bigint</span>,i20 <span class="built_in">bigint</span>, i21 <span class="built_in">bigint</span>,i22 <span class="built_in">bigint</span>,i23 <span class="built_in">bigint</span>,i24 <span class="built_in">bigint</span>,i25 <span class="built_in">bigint</span>,i26 <span class="built_in">bigint</span>,i27 <span class="built_in">bigint</span>,i28 <span class="built_in">bigint</span>,i29 <span class="built_in">bigint</span>,i30 <span class="built_in">bigint</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4allint30;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>2481MB</td>
+<td>2289MB</td>
+<td>2230MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>2480MB</td>
+<td>2461MB</td>
+<td>2461MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>2481/2289=1.08x</td>
+<td>2481/2230=1.11x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>92.3%</td>
+<td>89.9%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="测试场景3：-一列timestamp字段-N列real类型字段"><a href="#测试场景3：-一列timestamp字段-N列real类型字段" class="headerlink" title="测试场景3： 一列timestamp字段 + N列real类型字段"></a>测试场景3： 一列timestamp字段 + N列real类型字段</h3><p>数据量500万行</p>
+<h4 id="1、10列real类型字段，所有行real列数据都一致"><a href="#1、10列real类型字段，所有行real列数据都一致" class="headerlink" title="1、10列real类型字段，所有行real列数据都一致"></a>1、10列real类型字段，所有行real列数据都一致</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allrealextreme(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">real</span>,i2 <span class="built_in">real</span>,i3 <span class="built_in">real</span>,i4 <span class="built_in">real</span>,i5 <span class="built_in">real</span>,i6 <span class="built_in">real</span>,i7 <span class="built_in">real</span>,i8 <span class="built_in">real</span>,i9 <span class="built_in">real</span>,i10 <span class="built_in">real</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4allrealextreme;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>549MB</td>
+<td>170MB</td>
+<td>121MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>549MB</td>
+<td>520MB</td>
+<td>520MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>549/170=3.23x</td>
+<td>549/121=4.54x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>30.9%</td>
+<td>22%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2、10列real类型字段，所有行real列数据都是随机数"><a href="#2、10列real类型字段，所有行real列数据都是随机数" class="headerlink" title="2、10列real类型字段，所有行real列数据都是随机数"></a>2、10列real类型字段，所有行real列数据都是随机数</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allreal10(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">real</span>,i2 <span class="built_in">real</span>,i3 <span class="built_in">real</span>,i4 <span class="built_in">real</span>,i5 <span class="built_in">real</span>,i6 <span class="built_in">real</span>,i7 <span class="built_in">real</span>,i8 <span class="built_in">real</span>,i9 <span class="built_in">real</span>,i10 <span class="built_in">real</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4allreal10;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>549MB</td>
+<td>375MB</td>
+<td>304MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>549MB</td>
+<td>519MB</td>
+<td>519MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>549/375=1.46x</td>
+<td>549/304=1.8x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>68.3%</td>
+<td>55.3%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="3、20列real类型字段，所有行real列数据都是随机数"><a href="#3、20列real类型字段，所有行real列数据都是随机数" class="headerlink" title="3、20列real类型字段，所有行real列数据都是随机数"></a>3、20列real类型字段，所有行real列数据都是随机数</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allreal20(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">real</span>,i2 <span class="built_in">real</span>,i3 <span class="built_in">real</span>,i4 <span class="built_in">real</span>,i5 <span class="built_in">real</span>,i6 <span class="built_in">real</span>,i7 <span class="built_in">real</span>,i8 <span class="built_in">real</span>,i9 <span class="built_in">real</span>,i10 <span class="built_in">real</span>, i11 <span class="built_in">real</span>, i12 <span class="built_in">real</span>,i13 <span class="built_in">real</span>,i14 <span class="built_in">real</span>,i15 <span class="built_in">real</span>,i16 <span class="built_in">real</span>,i17 <span class="built_in">real</span>,i18 <span class="built_in">real</span>,i19 <span class="built_in">real</span>,i20 <span class="built_in">real</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4allreal20;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>751MB</td>
+<td>568MB</td>
+<td>476MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>750MB</td>
+<td>700MB</td>
+<td>700MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>751/568=1.32x</td>
+<td>751/476=1.58x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>75.6%</td>
+<td>63.4%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="4、30列real类型字段，所有行real列数据都是随机数"><a href="#4、30列real类型字段，所有行real列数据都是随机数" class="headerlink" title="4、30列real类型字段，所有行real列数据都是随机数"></a>4、30列real类型字段，所有行real列数据都是随机数</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4allreal30(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">real</span>,i2 <span class="built_in">real</span>,i3 <span class="built_in">real</span>,i4 <span class="built_in">real</span>,i5 <span class="built_in">real</span>,i6 <span class="built_in">real</span>,i7 <span class="built_in">real</span>,i8 <span class="built_in">real</span>,i9 <span class="built_in">real</span>,i10 <span class="built_in">real</span>, i11 <span class="built_in">real</span>, i12 <span class="built_in">real</span>,i13 <span class="built_in">real</span>,i14 <span class="built_in">real</span>,i15 <span class="built_in">real</span>,i16 <span class="built_in">real</span>,i17 <span class="built_in">real</span>,i18 <span class="built_in">real</span>,i19 <span class="built_in">real</span>,i20 <span class="built_in">real</span>, i21 <span class="built_in">real</span>,i22 <span class="built_in">real</span>,i23 <span class="built_in">real</span>,i24 <span class="built_in">real</span>,i25 <span class="built_in">real</span>,i26 <span class="built_in">real</span>,i27 <span class="built_in">real</span>,i28 <span class="built_in">real</span>,i29 <span class="built_in">real</span>,i30 <span class="built_in">real</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4allreal30;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>944MB</td>
+<td>833MB</td>
+<td>669MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>943MB</td>
+<td>893MB</td>
+<td>893MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>1.13x</td>
+<td>1.41x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>88.2%</td>
+<td>70.9%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="测试场景4：-一列timestamp字段-N列double类型字段"><a href="#测试场景4：-一列timestamp字段-N列double类型字段" class="headerlink" title="测试场景4： 一列timestamp字段 + N列double类型字段"></a>测试场景4： 一列timestamp字段 + N列double类型字段</h3><p>数据量500万行</p>
+<h4 id="1、10列double类型字段，所有行double列数据都一致"><a href="#1、10列double类型字段，所有行double列数据都一致" class="headerlink" title="1、10列double类型字段，所有行double列数据都一致"></a>1、10列double类型字段，所有行double列数据都一致</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4alldoubleextreme(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">float</span>,i2 <span class="built_in">float</span>,i3 <span class="built_in">float</span>,i4 <span class="built_in">float</span>,i5 <span class="built_in">float</span>,i6 <span class="built_in">float</span>,i7 <span class="built_in">float</span>,i8 <span class="built_in">float</span>,i9 <span class="built_in">float</span>,i10 <span class="built_in">float</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4alldoubleextreme;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>752MB</td>
+<td>184MB</td>
+<td>127MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>752MB</td>
+<td>699MB</td>
+<td>699MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>4.08x</td>
+<td>5.9x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>24.5%</td>
+<td>16.9%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2、10列double类型字段，所有行double列数据都是随机数"><a href="#2、10列double类型字段，所有行double列数据都是随机数" class="headerlink" title="2、10列double类型字段，所有行double列数据都是随机数"></a>2、10列double类型字段，所有行double列数据都是随机数</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4alldouble10(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">float</span>,i2 <span class="built_in">float</span>,i3 <span class="built_in">float</span>,i4 <span class="built_in">float</span>,i5 <span class="built_in">float</span>,i6 <span class="built_in">float</span>,i7 <span class="built_in">float</span>,i8 <span class="built_in">float</span>,i9 <span class="built_in">float</span>,i10 <span class="built_in">float</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4alldouble10;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>747MB</td>
+<td>568MB</td>
+<td>511MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>747MB</td>
+<td>700MB</td>
+<td>700MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>1.31x</td>
+<td>1.46x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>76%</td>
+<td>68.4%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="3、20列double类型字段，所有行double列数据都是随机数"><a href="#3、20列double类型字段，所有行double列数据都是随机数" class="headerlink" title="3、20列double类型字段，所有行double列数据都是随机数"></a>3、20列double类型字段，所有行double列数据都是随机数</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4alldouble20(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">float</span>,i2 <span class="built_in">float</span>,i3 <span class="built_in">float</span>,i4 <span class="built_in">float</span>,i5 <span class="built_in">float</span>,i6 <span class="built_in">float</span>,i7 <span class="built_in">float</span>,i8 <span class="built_in">float</span>,i9 <span class="built_in">float</span>,i10 <span class="built_in">float</span>, i11 <span class="built_in">float</span>, i12 <span class="built_in">float</span>,i13 <span class="built_in">float</span>,i14 <span class="built_in">float</span>,i15 <span class="built_in">float</span>,i16 <span class="built_in">float</span>,i17 <span class="built_in">float</span>,i18 <span class="built_in">float</span>,i19 <span class="built_in">float</span>,i20 <span class="built_in">float</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4alldouble20;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>1147MB</td>
+<td>1037MB</td>
+<td>894MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>1146MB</td>
+<td>1095MB</td>
+<td>1095MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>1.1x</td>
+<td>1.28x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>90.46%</td>
+<td>77.9%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="4、30列double类型字段，所有行double列数据都是随机数"><a href="#4、30列double类型字段，所有行double列数据都是随机数" class="headerlink" title="4、30列double类型字段，所有行double列数据都是随机数"></a>4、30列double类型字段，所有行double列数据都是随机数</h4><p>表结构:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> ext4alldouble30(</span><br><span class="line"><span class="keyword">time</span> <span class="keyword">timestamp</span> <span class="keyword">not</span> <span class="literal">null</span>, i1 <span class="built_in">float</span>,i2 <span class="built_in">float</span>,i3 <span class="built_in">float</span>,i4 <span class="built_in">float</span>,i5 <span class="built_in">float</span>,i6 <span class="built_in">float</span>,i7 <span class="built_in">float</span>,i8 <span class="built_in">float</span>,i9 <span class="built_in">float</span>,i10 <span class="built_in">float</span>, i11 <span class="built_in">float</span>, i12 <span class="built_in">float</span>,i13 <span class="built_in">float</span>,i14 <span class="built_in">float</span>,i15 <span class="built_in">float</span>,i16 <span class="built_in">float</span>,i17 <span class="built_in">float</span>,i18 <span class="built_in">float</span>,i19 <span class="built_in">float</span>,i20 <span class="built_in">float</span>, i21 <span class="built_in">float</span>,i22 <span class="built_in">float</span>,i23 <span class="built_in">float</span>,i24 <span class="built_in">float</span>,i25 <span class="built_in">float</span>,i26 <span class="built_in">float</span>,i27 <span class="built_in">float</span>,i28 <span class="built_in">float</span>,i29 <span class="built_in">float</span>,i30 <span class="built_in">float</span></span><br><span class="line">) <span class="keyword">tablespace</span> ext4alldouble30;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ext4</th>
+<th>zfs-lz4</th>
+<th>zfs-gzip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空间</td>
+<td>1538MB</td>
+<td>1434MB</td>
+<td>1242MB</td>
+</tr>
+<tr>
+<td>表空间</td>
+<td>1538MB</td>
+<td>1483MB</td>
+<td>1483MB</td>
+</tr>
+<tr>
+<td>压缩率</td>
+<td></td>
+<td>1.07x</td>
+<td>1.23x</td>
+</tr>
+<tr>
+<td>空间比率</td>
+<td></td>
+<td>93.2%</td>
+<td>80.8%</td>
+</tr>
+</tbody>
+</table>
+
+  </article>
+</div>
+
+
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<script src="/js/md5.min.js"></script>
+<div class='container' id="gitalk-container"></div>
+<script>
+    var gitalk = new Gitalk({
+        clientID: '0f95488e2c5e12bc2a2a',
+        clientSecret: 'b01836c08c02e727359d1c8df682e8b65fe41de1',
+        repo: 'blog_gitalk',
+        owner: 'oYo-Byte',
+        admin: ['oYo-Byte'],
+		id: md5(location.pathname),
+        distractionFreeMode: true,
+    })
+    gitalk.render('gitalk-container')
+</script>
+
+
+
+
+</div>
+
+<div class="footer-wrapper container">
+  <footer class="footer clearfix">
+    <a href="https://oyo-byte.github.io" class="footer-logo">
+      <i class="fa fa-github"></i>
+    </a>
+    <ul class="footer-social-link">
+      <li>© 2018 oYo-Byte</li>
+      <li><a href="https://oyo-byte.github.io">Home</a></li>
+      
+      <li><a href="https://github.com/oYo-Byte">Github</a></li>
+      
+    </ul>
+    <div class="footer-theme-info">
+      Theme <a href="//github.com/sabrinaluo/hexo-theme-replica">Replica</a>
+      by <a href="//github.com/sabrinaluo">Hiitea</a> ❤ Powered by Hexo
+    </div>
+  </footer>
+</div>
+
+
+
+
+<script src="/js/main.js"></script>
+
+</body>
+</html>

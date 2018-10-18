@@ -146,18 +146,42 @@
     <li class="">
       <a href="/">Overview</a></li>
     <li class="">
-      <a href="/archives">Posts <span class="counter">13</span></a>
+      <a href="/archives">Posts <span class="counter">14</span></a>
     </li>
     <li class="">
       <a href="/categories">Categories <span
                 class="counter">3</span></a></li>
     <li class="selected">
-      <a href="/tags">Tags <span class="counter">9</span></a></li>
+      <a href="/tags">Tags <span class="counter">10</span></a></li>
   </ul>
 </nav>
 
     <div class="body-secondary">
       <ul class="archive-list">
+        
+        <li class="archive-list-item">
+          <h2><a href="/2018/08/03/learn_about_pgfdw/">学习PostgreSQL的FDW(#1)</a></h2>
+          <p>
+             实现一个FDW的核心是实现一组回调函数，有了这些回调函数的帮助, 在查询外部表对象的执行过程中就可以将运行逻辑切换至自定义的扩展代码中, 进而遵照PG的内部机制实现对外部数据源的访问。 
+ 目前PostgreSQL11 beta2，提供的FDW回调函数接口有39个。FDW的实现者需要根据外部数据源...
+          </p>
+          <ul class="tag-list clearfix">
+            
+            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
+            
+          </ul>
+          <div class="post-info">
+            <span>
+              
+              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
+              
+            </span>
+            <span><i class="fa fa-tag"></i> 2 </span>
+            <span>Published {{moment(1533282762563).fromNow()}}</span>
+          </div>
+        </li>
         
         <li class="archive-list-item">
           <h2><a href="/2018/07/25/PostgreSQL使用oracle_fdw与Oracle查询性能对比/">PostgreSQL使用oracle_fdw与Oracle查询性能对比</a></h2>
