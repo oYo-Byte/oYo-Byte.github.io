@@ -160,24 +160,17 @@
       <ul class="archive-list">
         
         <li class="archive-list-item">
-          <h2><a href="/2018/07/25/PostgreSQL使用oracle_fdw与Oracle查询性能对比/">PostgreSQL使用oracle_fdw与Oracle查询性能对比</a></h2>
+          <h2><a href="/2018/10/25/postgresql_fde_encryption/">PostgreSQL FDE加密</a></h2>
           <p>
-               在PostgreSQL中使用oracle_fdw    安装oracle_fdw插件  
- 安装前要求： 
- 
- 
- 全部功能要求PostgreSQL9.3及以上 
- Oracle client要求10.1以上 
- 确保PostgreSQL配置了 --without-ldap  
- 确保 pg...
+               FDE原理：    
+ FDE全称Full database encryption，是全数据库加密，FDE加密对客户端完全透明，当数据从Shared buffer中写入到磁盘的时候，先进行加密，再写进磁盘，反之，读取磁盘，再进行解密，加解密的单位是一个page。 
+ 下面根据cybertec开...
           </p>
           <ul class="tag-list clearfix">
             
             <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
             
-            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
-            
-            <li class="tag-list-item"><a href="/tags/oracle/">oracle</a></li>
+            <li class="tag-list-item"><a href="/tags/加密/">加密</a></li>
             
           </ul>
           <div class="post-info">
@@ -186,8 +179,8 @@
               <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
               
             </span>
-            <span><i class="fa fa-tag"></i> 3 </span>
-            <span>Published {{moment(1532489392892).fromNow()}}</span>
+            <span><i class="fa fa-tag"></i> 2 </span>
+            <span>Published {{moment(1540439748239).fromNow()}}</span>
           </div>
         </li>
         

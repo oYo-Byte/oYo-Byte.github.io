@@ -146,18 +146,68 @@
     <li class="">
       <a href="/">Overview</a></li>
     <li class="selected">
-      <a href="/archives">Posts <span class="counter">14</span></a>
+      <a href="/archives">Posts <span class="counter">16</span></a>
     </li>
     <li class="">
       <a href="/categories">Categories <span
                 class="counter">3</span></a></li>
     <li class="">
-      <a href="/tags">Tags <span class="counter">10</span></a></li>
+      <a href="/tags">Tags <span class="counter">12</span></a></li>
   </ul>
 </nav>
 
     <div class="body-secondary">
       <ul class="archive-list">
+        
+        <li class="archive-list-item">
+          <h2><a href="/2018/08/07/learn_about_pgfdw_part3/">学习PostgreSQL的FDW(#3)-其他函数说明 I</a></h2>
+          <p>
+             上两篇文章主要介绍了实现FDW的7个必须实现的扫描相关的回调函数， 学习PostgreSQL的FDW(#1) ，  学习PostgreSQL的FDW(#2)-源码跟踪 ，这边就继续说说其余32个回调函数 
+   用于扫描外部连接的回调函数  如果一个 FDW 支持远程执行外部连接（而不是先把两个表...
+          </p>
+          <ul class="tag-list clearfix">
+            
+            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
+            
+          </ul>
+          <div class="post-info">
+            <span>
+              
+              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
+              
+            </span>
+            <span><i class="fa fa-tag"></i> 2 </span>
+            <span>Published {{moment(1533635241871).fromNow()}}</span>
+          </div>
+        </li>
+        
+        <li class="archive-list-item">
+          <h2><a href="/2018/08/07/learn_about_pgfdw_part2/">学习PostgreSQL的FDW(#2)-源码跟踪</a></h2>
+          <p>
+             上篇大概介绍了FDW必须实现的7个回调函数 学习PostgreSQL的FDW(#1) ，本篇将从源码跟踪，这7个回调函数的调用时机，以PostgreSQL11beta2的postgres_fdw为例，分析PostgreSQL在查询外部表时，究竟做了什么。 
+   测试前准备  IP为192.168...
+          </p>
+          <ul class="tag-list clearfix">
+            
+            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/gdb/">gdb</a></li>
+            
+          </ul>
+          <div class="post-info">
+            <span>
+              
+              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
+              
+            </span>
+            <span><i class="fa fa-tag"></i> 3 </span>
+            <span>Published {{moment(1533608145504).fromNow()}}</span>
+          </div>
+        </li>
         
         <li class="archive-list-item">
           <h2><a href="/2018/08/03/learn_about_pg_query_processing/">学习PostgreSQL的查询机制</a></h2>

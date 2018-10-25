@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://oyo-byte.github.io/2018/10/25/postgresql_fde_encryption/</loc>
+    
+    <lastmod>2018-10-25T10:36:37.903Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://oyo-byte.github.io/2018/10/19/postgresql_copy_vs_insert/</loc>
+    
+    <lastmod>2018-10-25T03:57:29.986Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://oyo-byte.github.io/2018/10/11/timescaledb_on_zfs_vs_on_ext4/</loc>
     
     <lastmod>2018-10-18T16:56:25.958Z</lastmod>
