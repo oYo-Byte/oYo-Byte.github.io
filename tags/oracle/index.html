@@ -146,13 +146,13 @@
     <li class="">
       <a href="/">Overview</a></li>
     <li class="">
-      <a href="/archives">Posts <span class="counter">16</span></a>
+      <a href="/archives">Posts <span class="counter">17</span></a>
     </li>
     <li class="">
       <a href="/categories">Categories <span
-                class="counter">3</span></a></li>
+                class="counter">7</span></a></li>
     <li class="selected">
-      <a href="/tags">Tags <span class="counter">12</span></a></li>
+      <a href="/tags">Tags <span class="counter">20</span></a></li>
   </ul>
 </nav>
 
@@ -160,34 +160,28 @@
       <ul class="archive-list">
         
         <li class="archive-list-item">
-          <h2><a href="/2018/07/25/PostgreSQL使用oracle_fdw与Oracle查询性能对比/">PostgreSQL使用oracle_fdw与Oracle查询性能对比</a></h2>
+          <h2><a href="/2019/01/07/oracle_join_operator/">Oralce连接运算符(+)</a></h2>
           <p>
-               在PostgreSQL中使用oracle_fdw    安装oracle_fdw插件  
- 安装前要求： 
+             Oracle外连接除了常用的 LEFT|RIGHT|FULL [OUTER] JOIN 外，还有其特有的连接运算符(+)。但使用(+)运算符受以下限制： 
  
- 
- 全部功能要求PostgreSQL9.3及以上 
- Oracle client要求10.1以上 
- 确保PostgreSQL配置了 --without-ldap  
- 确保 pg...
+ 不能在包含FROM子句连接语法的查询块中使用(+)运算符。 
+ (+)运算符只能出现在WHERE子句中，或者出现在FROM子句中左相关（...
           </p>
           <ul class="tag-list clearfix">
             
-            <li class="tag-list-item"><a href="/tags/PostgreSQL/">PostgreSQL</a></li>
+            <li class="tag-list-item"><a href="/tags/Oracle/">Oracle</a></li>
             
-            <li class="tag-list-item"><a href="/tags/FDW/">FDW</a></li>
-            
-            <li class="tag-list-item"><a href="/tags/oracle/">oracle</a></li>
+            <li class="tag-list-item"><a href="/tags/join-operator/">join operator(+)</a></li>
             
           </ul>
           <div class="post-info">
             <span>
               
-              <a class="category-link" href="/categories/PostgreSQL/"><i class="fa fa-folder-open"></i> PostgreSQL</a>
+              <a class="category-link" href="/categories/SQL/"><i class="fa fa-folder-open"></i> SQL</a>
               
             </span>
-            <span><i class="fa fa-tag"></i> 3 </span>
-            <span>Published {{moment(1532489392892).fromNow()}}</span>
+            <span><i class="fa fa-tag"></i> 2 </span>
+            <span>Published {{moment(1546833380509).fromNow()}}</span>
           </div>
         </li>
         
@@ -216,6 +210,15 @@
     </div>
   </footer>
 </div>
+
+
+
+
+<script src="/js/main.js"></script>
+
+</body>
+</html>
+v>
 
 
 

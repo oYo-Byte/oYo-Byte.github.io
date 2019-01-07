@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://oyo-byte.github.io/2019/01/07/oracle_join_operator/</loc>
+    
+    <lastmod>2019-01-07T09:09:40.953Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://oyo-byte.github.io/2018/10/25/postgresql_fde_encryption/</loc>
     
     <lastmod>2018-10-25T10:36:37.903Z</lastmod>
